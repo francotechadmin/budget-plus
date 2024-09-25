@@ -1,0 +1,71 @@
+version: "3"
+services:
+  client:
+    build: "./client"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/src:/app/src
+    networks:
+      - client-side
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  api:
+    build: "./api"
+    ports:
+      - "8000:8000"
+    environment:
+      - PG_DBNAME=postgres
+      - PG_HOST=db
+      - PG_USER=postgres
+      - PG_PASSWORD=mysecretpassword
+    volumes:
+      - ./api:/app
+    networks:
+      - server-side
+    depends_on:
+      - elasticsearch
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - server-side
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.1
+
+    environment:
+      - discovery.type=single-node
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - server-side
+
+networks:
+  client-side: {}
+  server-side: {}
+
+volumes:
+  esdata:
+    driver: local
+  postgres_data:
+    driver: local
