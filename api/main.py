@@ -375,8 +375,8 @@ def get_transactions_history(db: Session = Depends(get_db)):
         else:
             history[year_month]["expenses"] += transaction.amount
 
-    # reverse the order of the history
-    history = dict(reversed(list(history.items())))
+    # sort by date
+    history = dict(sorted(history.items(), key=lambda x: pd.to_datetime(x[0]), reverse=False))
 
     return history
 
