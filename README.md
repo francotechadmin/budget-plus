@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/francotechadmin/budget-app">
+  <a href="https://github.com/francotechadmin/budget-plus">
     <img src="public/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -12,12 +12,12 @@
   <p align="center">
     An awesome project to manage your budget!
     <br />
-    <a href="https://github.com/francotechadmin/budget-app"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/francotechadmin/budget-plus"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/francotechadmin/budget-app/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/francotechadmin/budget-plus/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/francotechadmin/budget-app/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/francotechadmin/budget-plus/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -49,7 +49,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][screenshot]](https://github.com/francotechadmin/budget-app)
+[![Product Name Screen Shot][screenshot]](https://github.com/francotechadmin/budget-plus)
 
 Budget+ is a personal finance app that makes it easy to see your total balance, categorize your transactions, and set budgets so you can save more money. It's a simple and easy-to-use app that helps you keep track of your finances and stay on top of your spending.
 
@@ -118,7 +118,7 @@ Add transactions to your account, categorize them, and view charts to keep track
 - [ ] Add multi-currency support
 - [ ] Create mobile app version
 
-See the [open issues](https://github.com/francotechadmin/budget-app/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/francotechadmin/budget-plus/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -153,7 +153,7 @@ Distributed under the MIT License.
 
 Gabriel Franco - [francoxgabriel@gmail.com](mailto:francoxgabriel@gmail.com)
 
-Project Link: [https://github.com/francotechadmin/budget-app](https://github.com/francotechadmin/budget-app)
+Project Link: [https://github.com/francotechadmin/budget-plus](https://github.com/francotechadmin/budget-plus)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
