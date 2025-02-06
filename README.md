@@ -53,6 +53,8 @@
 
 Budget+ is a personal finance app that makes it easy to see your total balance, categorize your transactions, and set budgets so you can save more money. It's a simple and easy-to-use app that helps you keep track of your finances and stay on top of your spending.
 
+The app is built using React, FastAPI, PostgreSQL, and Elasticsearch. Elasticsearch is used for categorizing transactions.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
@@ -61,6 +63,7 @@ Budget+ is a personal finance app that makes it easy to see your total balance, 
 - [![FastAPI][FastAPI]][FastAPI-url]
 - [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 - [![ShadCN][ShadCN]][ShadCN-url]
+- [![Elasticsearch][Elasticsearch]][Elasticsearch-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -68,7 +71,6 @@ Budget+ is a personal finance app that makes it easy to see your total balance, 
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Running the App
@@ -166,3 +168,5 @@ Project Link: [https://github.com/francotechadmin/budget-plus](https://github.co
 [ShadCN]: https://img.shields.io/badge/ShadCN-005571?style=for-the-badge&logo=shadcn
 [ShadCN-url]: https://shadcn.com/
 [screenshot]: public/app_screenshot.png
+[Elasticsearch]: https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=elasticsearch
+[Elasticsearch-url]: https://www.elastic.co/elasticsearch/
