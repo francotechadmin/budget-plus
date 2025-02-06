@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 
-from elasticsearch_simple_client.config import Config
-from elasticsearch_simple_client.search_query_builder import SearchQueryBuilder
+from .config import Config
+from .search_query_builder import SearchQueryBuilder
 
 
 class Searcher:

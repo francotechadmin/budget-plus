@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+gunicorn
+sqlalchemy
+pandas
+openpyxl
+python-multipart
+matplotlib
+mplcursors
+psycopg2
+elasticsearch

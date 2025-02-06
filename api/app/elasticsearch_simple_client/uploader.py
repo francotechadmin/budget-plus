@@ -1,8 +1,8 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 
-from elasticsearch_simple_client.config import Config
-from elasticsearch_simple_client.upload_query_builder import UploadQueryBuilder
+from .config import Config
+from .upload_query_builder import UploadQueryBuilder
 
 
 class Uploader:
