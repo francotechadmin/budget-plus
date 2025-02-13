@@ -25,8 +25,15 @@ RUN pip install --upgrade pip && \
 # Copy the rest of the application code into the container
 COPY . .
 
+# Copy the entrypoint script into the image
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port 8000 to the host
 EXPOSE 8000
+
+# Set the entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Command to run the application using Gunicorn with Uvicorn workers
 # Adjust the number of workers as necessary for your environment
