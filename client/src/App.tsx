@@ -76,7 +76,7 @@ const rootRoute = createRootRoute({
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        <div>
+        <div className="flex gap-2">
           {/* dark mode */}
           <Button
             variant="outline"
@@ -87,6 +87,16 @@ const rootRoute = createRootRoute({
             }}
           >
             Toggle Mode
+          </Button>
+          {/* logout */}
+          <Button
+            variant="outline"
+            className="h-8"
+            onClick={() => {
+              window.location.href = "/logout";
+            }}
+          >
+            Logout
           </Button>
         </div>
       </div>
@@ -145,11 +155,32 @@ const analysisRoute = createRoute({
   },
 });
 
+// logout
+const logoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/logout",
+  component: function Logout() {
+    const { logout } = useAuth0();
+    useEffect(() => {
+      const logoutWithRedirect = () =>
+        logout({
+          logoutParams: {
+            returnTo: window.location.origin,
+          },
+        });
+
+      logoutWithRedirect();
+    }, [logout]);
+    return <Loading />;
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   chartsRoute,
   budgetRoute,
   analysisRoute,
+  logoutRoute,
 ]);
 
 const router = createRouter({ routeTree });
