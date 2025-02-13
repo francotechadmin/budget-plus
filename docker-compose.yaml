@@ -22,6 +22,7 @@ services:
       - PG_HOST=db
       - PG_USER=postgres
       - PG_PASSWORD=mysecretpassword
+      - PG_PORT=5432
     volumes:
       - ./api:/app
     networks:
@@ -37,7 +38,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - server-side
     healthcheck:

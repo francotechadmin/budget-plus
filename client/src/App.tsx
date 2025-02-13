@@ -22,6 +22,11 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Notebook } from "lucide-react";
 import { Button } from "./components/ui/button.tsx";
+import { useAuth0 } from "@auth0/auth0-react";
+import { withAuthenticationRequired } from "@auth0/auth0-react";
+import Loading from "./components/ui/loading.tsx";
+import { useEffect } from "react";
+import { addAccessTokenInterceptor } from "./lib/axios.ts";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -149,16 +154,25 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({ routeTree });
 
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
 // Create a QueryClient instance
 const queryClient = new QueryClient();
 
 function App() {
+  const { isLoading, error, getAccessTokenSilently } = useAuth0();
+
+  // add access token interceptor to axios
+  useEffect(() => {
+    addAccessTokenInterceptor(getAccessTokenSilently);
+  }, [getAccessTokenSilently]);
+
+  if (error) {
+    return <div>Oops... {error.message}</div>;
+  }
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="App h-screen max-w-6xl mx-auto flex flex-col overflow-hidden">
@@ -168,4 +182,8 @@ function App() {
   );
 }
 
-export default App;
+const AuthenticatedApp = withAuthenticationRequired(App, {
+  onRedirecting: () => <Loading />,
+});
+
+export default AuthenticatedApp;
