@@ -5,6 +5,8 @@ import App from "./App";
 import { Auth0Provider, AppState } from "@auth0/auth0-react";
 import { getConfig } from "./lib/config";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 const onRedirectCallback = (appState?: AppState) => {
   window.history.pushState(
     {},
@@ -25,10 +27,15 @@ const providerConfig = {
   },
 };
 
+// Create a QueryClient instance
+const queryClient = new QueryClient();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Auth0Provider {...providerConfig}>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </Auth0Provider>
   </StrictMode>
 );

@@ -19,7 +19,6 @@ import {
   createRoute,
   createRootRoute,
 } from "@tanstack/react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Notebook } from "lucide-react";
 import { Button } from "./components/ui/button.tsx";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -27,6 +26,7 @@ import { withAuthenticationRequired } from "@auth0/auth0-react";
 import Loading from "./components/ui/loading.tsx";
 import { useEffect } from "react";
 import { addAccessTokenInterceptor } from "./lib/axios.ts";
+import { useUpsertUserMutation } from "./hooks/api/useUserUpsert.ts";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -185,16 +185,21 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({ routeTree });
 
-// Create a QueryClient instance
-const queryClient = new QueryClient();
-
 function App() {
-  const { isLoading, error, getAccessTokenSilently } = useAuth0();
+  const { isLoading, error, getAccessTokenSilently, user } = useAuth0();
+  const upsertUserMutation = useUpsertUserMutation();
 
   // add access token interceptor to axios
   useEffect(() => {
     addAccessTokenInterceptor(getAccessTokenSilently);
   }, [getAccessTokenSilently]);
+
+  // upsert user on mount
+  useEffect(() => {
+    if (!isLoading || (!error && user)) {
+      upsertUserMutation.mutate();
+    }
+  }, []);
 
   if (error) {
     return <div>Oops... {error.message}</div>;
@@ -205,11 +210,9 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="App h-screen max-w-6xl mx-auto flex flex-col overflow-hidden">
-        <RouterProvider router={router} />
-      </div>
-    </QueryClientProvider>
+    <div className="App h-screen max-w-6xl mx-auto flex flex-col overflow-hidden">
+      <RouterProvider router={router} />
+    </div>
   );
 }
 

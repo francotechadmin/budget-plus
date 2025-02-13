@@ -11,9 +11,7 @@ import { Button } from "../components/ui/button";
 
 // Fetch transactions and categories from the backend
 const fetchTransactions = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/transactions`
-  );
+  const response = await axios.get(`/transactions`);
   return response.data;
 };
 
