@@ -26,7 +26,7 @@ import { withAuthenticationRequired } from "@auth0/auth0-react";
 import Loading from "./components/ui/loading.tsx";
 import { useEffect } from "react";
 import { addAccessTokenInterceptor } from "./lib/axios.ts";
-import { useUpsertUserMutation } from "./hooks/api/useUserUpsert.ts";
+import { useUpsertUserMutation } from "./hooks/api/useUserUpsert";
 
 const rootRoute = createRootRoute({
   component: () => (

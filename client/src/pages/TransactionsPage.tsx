@@ -2,18 +2,13 @@ import { createColumns } from "../components/columns";
 import { DataTable } from "../components/data-table";
 import {
   useQuery,
-  keepPreviousData,
+  // keepPreviousData,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { Button } from "../components/ui/button";
-
-// Fetch transactions and categories from the backend
-const fetchTransactions = async () => {
-  const response = await axios.get(`/transactions`);
-  return response.data;
-};
+import { useFetchTransactions } from "@/hooks/api/usefetchTransactions";
 
 const fetchCategories = async () => {
   const response = await axios.get(
@@ -45,11 +40,17 @@ export default function TransactionsPage() {
     data: transactions,
     isLoading: transactionsLoading,
     isError: transError,
-  } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: fetchTransactions,
-    placeholderData: keepPreviousData,
-  });
+  } = useFetchTransactions();
+
+  // const {
+  //   data: transactions,
+  //   isLoading: transactionsLoading,
+  //   isError: transError,
+  // } = useQuery({
+  //   queryKey: ["transactions"],
+  //   queryFn: fetchTransactions,
+  //   placeholderData: keepPreviousData,
+  // });
 
   const {
     data: categories,
@@ -128,7 +129,7 @@ export default function TransactionsPage() {
       </div>
       <DataTable
         columns={columns}
-        data={transactions}
+        data={transactions ?? []}
         categories={categories}
       />
     </div>

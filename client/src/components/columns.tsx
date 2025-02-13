@@ -14,15 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CategoryDropdown } from "./CategoryDropdown";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
-
-// Define the shape of the transaction data.
-export type Transaction = {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  category: string;
-};
+import { Transaction } from "@/models/transactions";
 
 // Define the columns for the transaction table, passing categories from props
 export const createColumns = (
