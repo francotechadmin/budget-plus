@@ -16,7 +16,7 @@ if config.config_file_name is not None:
 
 # Import your models' MetaData object for 'autogenerate' support.
 # Update the import path according to your project structure.
-from app.database.database import Base  # make sure this is the correct import
+from app.main import Base  # make sure this is the correct import
 target_metadata = Base.metadata
 
 # Optionally, if you are using environment variables for the DB URL,

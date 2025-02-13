@@ -57,3 +57,18 @@ def get_current_user(token: str = Depends(get_token_auth_header)) -> dict:
     Dependency that returns the decoded JWT payload.
     """
     return verify_jwt(token)
+
+def get_user_info(token: str = Depends(get_token_auth_header)) -> dict:
+    """
+    Fetch user information from Auth0.
+    """
+
+    # verify the token first
+    verify_jwt(token)
+
+    user_info_url = f"https://{AUTH0_DOMAIN}/userinfo"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(user_info_url, headers=headers, verify=False)
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return response.json()
