@@ -18,7 +18,7 @@ def create_user_endpoint(db: Session = Depends(get_db), current_user: dict = Dep
     )
     db_user = get_user(db, user_id=user.id)
     if db_user:
-        raise HTTPException(status_code=400, detail="User already registered")
+        return db_user
     return create_user(db=db, user=user)
 
 @router.get("/", response_model=UserRead)
