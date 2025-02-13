@@ -1,0 +1,18 @@
+default_sections = [
+    {"section": "Income", "categories": ["Salary", "Bonus", "Interest Income", "Refunds"]},
+    {"section": "Housing", "categories": ["Rent", "Home Insurance", "Electricity"]},
+    {"section": "Utilities", "categories": ["Water", "Gas", "Phone Service", "Internet"]},
+    {"section": "Transportation", "categories": ["Fuel", "Public Transport", "Car Insurance", "Vehicle Maintenance", "Tolls", "Parking"]},
+    {"section": "Food & Dining", "categories": ["Groceries", "Restaurants", "Cafes", "Fast Food", "Bars & Alcohol"]},
+    {"section": "Health & Fitness", "categories": ["Health Insurance", "Gym Membership", "Doctor Visits", "Dental Services", "Pharmacy", "Prescriptions"]},
+    {"section": "Entertainment", "categories": ["Movies", "Concerts", "Streaming Services", "Gaming", "Activities", "Subscriptions"]},
+    {"section": "Shopping", "categories": ["Clothing", "Electronics", "Household Items", "Online Shopping", "Beauty & Personal Care"]},
+    {"section": "Education", "categories": ["Tuition Fees", "School Supplies", "Books & Materials"]},
+    {"section": "Travel", "categories": ["Flights", "Hotels", "Car Rentals", "Taxi Service"]},
+    {"section": "Savings & Transfers", "categories": ["Transfer"]},
+    {"section": "Debt & Loans", "categories": ["Credit Card Payments", "Student Loans"]},
+    {"section": "Taxes", "categories": ["Federal Taxes", "Tax Refund"]},
+    {"section": "Fees & Charges", "categories": ["Bank Fees", "ATM Fees", "Foreign Transaction Fees"]},
+    {"section": "Gifts & Donations", "categories": ["Charitable Donations", "Gifts"]},
+    {"section": "Miscellaneous", "categories": ["Uncategorized", "Other Expenses", "Other Income"]},
+]
