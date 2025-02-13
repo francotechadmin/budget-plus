@@ -9,3 +9,7 @@ matplotlib
 mplcursors
 psycopg2
 elasticsearch
+python-jose[cryptography]
+pydantic[email]
+requests
+passlib

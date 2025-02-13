@@ -14,6 +14,9 @@ from ..schemas.schemas import UpdateTransactionRequest
 from ..elasticsearch_simple_client.uploader import Uploader
 from ..elasticsearch_simple_client.searcher import Searcher
 
+# Import authentication helper
+from ..auth import get_current_user
+
 router = APIRouter()
 
 
@@ -115,7 +118,8 @@ async def upload_bank_transactions(files: list[UploadFile] = File(...), db: Sess
 
 
 @router.get("/", summary="Get all transactions")
-def get_transactions(db: Session = Depends(get_db)):
+def get_transactions(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+
     txns = db.query(Transaction).all()
     # Sort transactions by date and description (newest first)
     txns = sorted(txns, key=lambda x: (x.date, x.description), reverse=True)
