@@ -331,10 +331,10 @@ def get_transactions_history(db: Session = Depends(get_db), current_user: dict =
     six_months_ago = six_months_ago.replace(day=1)
     
     try:
-        txns = (
-            db.query(Transaction)
-            .join(Category)
-            .join(Section)
+        rows = (
+            db.query(Transaction, Category.name, Section.name)
+            .join(Category, Transaction.category_id == Category.id)
+            .join(Section, Transaction.category_id == Category.id)
             .filter(
                 Transaction.date >= six_months_ago,
                 Transaction.user_id == current_user["sub"],
@@ -342,17 +342,18 @@ def get_transactions_history(db: Session = Depends(get_db), current_user: dict =
             )
             .all()
         )
-        logger.debug(f"Found {len(txns)} transactions in the last six months.")
+        logger.debug(f"Found {len(rows)} transactions in the last six months.")
     except Exception as e:
         logger.error(f"Error retrieving transaction history: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transaction history.")
     
     history = {}
-    for txn in txns:
+    for row in rows:
+        txn, category_name, section_name = row
         key = txn.date.strftime("%B %Y")
         if key not in history:
             history[key] = {"income": 0, "expenses": 0}
-        if txn.category and txn.category.section and txn.category.section.name == 'Income':
+        if category_name and section_name and section_name == 'Income':
             history[key]["income"] += txn.amount
         else:
             history[key]["expenses"] += txn.amount
