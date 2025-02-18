@@ -1,20 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import BarChartVertical from "../components/BarChartVertical"; // Import the BarChartVertical component
-
-// Fetch transactions and categories from the backend
-const fetchExpensesHistory = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/transactions/history`
-  );
-  return response.data;
-};
+import { useGetTransactionHistoryQuery } from "@/hooks/api/useGetTransactionHistoryQuery";
 
 const HistoryPage = () => {
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["transaction_history"],
-    queryFn: () => fetchExpensesHistory(),
-  });
+  const { data: transactions, isLoading: transactionsLoading } =
+    useGetTransactionHistoryQuery();
 
   if (transactionsLoading) {
     return <div>Loading...</div>;
