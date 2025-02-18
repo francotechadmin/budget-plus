@@ -2,7 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,11 +14,12 @@ import {
 import { CategoryDropdown } from "./CategoryDropdown";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { Transaction } from "@/models/transactions";
+import { Sections } from "@/models/sections";
 
-// Define the columns for the transaction table, passing categories from props
+// Define the columns for the transaction table, passing sections from props
 export const createColumns = (
-  categories: Record<string, string[]>,
-  deleteTransaction: (id: string) => void
+  sections: Sections,
+  deleteMutationHandler: (id: string) => void
 ): ColumnDef<Transaction>[] => [
   {
     accessorKey: "description",
@@ -55,7 +55,7 @@ export const createColumns = (
         <CategoryDropdown
           transactionId={transaction.id}
           initialCategory={transaction.category}
-          categories={categories}
+          sections={sections}
         />
       );
     },
@@ -82,7 +82,9 @@ export const createColumns = (
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Edit Transaction</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => deleteTransaction(transaction.id)}>
+            <DropdownMenuItem
+              onClick={() => deleteMutationHandler(transaction.id)}
+            >
               Delete Transaction
             </DropdownMenuItem>
           </DropdownMenuContent>

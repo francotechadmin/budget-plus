@@ -22,17 +22,18 @@ import {
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./DataTablePagination";
+import { Sections } from "@/models/sections";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  categories: string[]; // Add categories as a prop
+  sections: Sections; // Add categories as a prop
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  categories,
+  sections,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -111,7 +112,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, {
                         ...cell.getContext(),
-                        categories,
+                        sections,
                       })}
                     </TableCell>
                   ))}

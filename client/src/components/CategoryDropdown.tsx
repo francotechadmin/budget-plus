@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useUpdateTransactionMutation } from "@/hooks/api/useUpdateTransactionMutation";
 import {
   Select,
   SelectContent,
@@ -15,49 +14,24 @@ import {
 interface CategoryDropdownProps {
   transactionId: string;
   initialCategory: string;
-  categories: Record<string, string[]>;
+  sections: Record<string, string[]>;
 }
-
-// Update the category of a transaction in the backend
-const updateCategory = async ({
-  id,
-  category,
-}: {
-  id: string;
-  category: string;
-}) => {
-  const response = await axios.post(
-    `http://localhost:8000/update-transaction`,
-    {
-      transaction_id: id,
-      category: category,
-    }
-  );
-  return response.data;
-};
 
 export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   transactionId,
   initialCategory,
-  categories,
+  sections,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const queryClient = useQueryClient();
 
-  const updateCategoryMutation = useMutation({
-    mutationFn: updateCategory,
-    onSuccess: (data) => {
-      console.log("Category updated successfully");
-      queryClient.setQueryData(["transactions"], data);
-    },
-  });
+  const { mutate: updateTransaction } = useUpdateTransactionMutation();
 
   const handleCategoryChange = async (value: string) => {
     const newCategory = value;
     setSelectedCategory(newCategory);
 
     // Optimistically update the category in the table
-    updateCategoryMutation.mutate({
+    updateTransaction({
       id: transactionId,
       category: newCategory,
     });
@@ -73,9 +47,9 @@ export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
       </SelectTrigger>
       <SelectContent>
         {/* Select grouped by section (Income, Housing, etc.) */}
-        {Object.entries(categories).map(([categoryGroup, categoryItems]) => (
-          <SelectGroup key={categoryGroup}>
-            <SelectLabel>{categoryGroup}</SelectLabel>
+        {Object.entries(sections).map(([section, categoryItems]) => (
+          <SelectGroup key={section}>
+            <SelectLabel>{section}</SelectLabel>
             {categoryItems.map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
