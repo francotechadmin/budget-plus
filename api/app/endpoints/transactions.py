@@ -208,10 +208,10 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
     end_date = f"{year}-{month:02d}-{last_day}"
     
     try:
-        txns = (
-            db.query(Transaction)
-            .join(Category)
-            .join(Section)
+        rows = (
+            db.query(Transaction, Category.name, Section.name)
+            .join(Category, Transaction.category_id == Category.id)
+            .join(Section, Category.section_id == Section.id)
             .filter(
                 Transaction.date >= start_date,
                 Transaction.date <= end_date,
@@ -219,15 +219,14 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
             )
             .all()
         )
-        logger.debug(f"Found {len(txns)} transactions for {year}-{month:02d} for user {current_user['sub']}.")
+        logger.debug(f"Found {len(rows)} transactions for {year}-{month:02d} for user {current_user['sub']}.")
     except Exception as e:
         logger.error(f"Error retrieving transactions by month: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transactions for the specified month.")
     
     grouped = {}
-    for txn in txns:
-        section_name = txn.category.section.name if txn.category and txn.category.section else "Unknown"
-        category_name = txn.category.name if txn.category else "Unknown"
+    for row in rows:
+        txn, category_name, section_name = row
         grouped.setdefault(section_name, {}).setdefault(category_name, []).append({
             "id": txn.id,
             "description": txn.description,
@@ -242,7 +241,7 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
     for section, cats in sorted(grouped.items()):
         sorted_grouped[section] = cats
     logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
-    return sorted_grouped
+    return {"transactions": sorted_grouped}
 
 @router.get("/expenses/{year}/{month}", summary="Get expense totals for a month")
 def get_transactions_expenses(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
@@ -256,8 +255,8 @@ def get_transactions_expenses(year: int, month: int, db: Session = Depends(get_d
     end_date = f"{year}-{month:02d}-{last_day}"
     
     try:
-        txns = (
-            db.query(Transaction)
+        rows = (
+            db.query(Transaction, Category.name)
             .join(Category)
             .join(Section)
             .filter(
@@ -269,18 +268,18 @@ def get_transactions_expenses(year: int, month: int, db: Session = Depends(get_d
             )
             .all()
         )
-        logger.debug(f"Found {len(txns)} expense transactions for {year}-{month:02d}.")
+        logger.debug(f"Found {len(rows)} expense transactions for {year}-{month:02d}.")
     except Exception as e:
         logger.error(f"Error retrieving expense transactions: {e}")
         raise HTTPException(status_code=500, detail="Error calculating expenses.")
     
     totals = {}
-    for txn in txns:
-        category_name = txn.category.name if txn.category else "Unknown"
+    for row in rows:
+        txn, category_name = row
         totals.setdefault(category_name, 0)
         totals[category_name] += txn.amount
     logger.info(f"Returning expense totals for {year}-{month:02d}.")
-    return totals
+    return {"totals": totals}
 
 @router.get("/totals/{year}/{month}", summary="Get income and expenses totals for a month")
 def get_transactions_totals(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
@@ -369,14 +368,14 @@ def get_transactions_range(db: Session = Depends(get_db), current_user: dict = D
     """
     logger.info(f"Retrieving transaction month range for user {current_user['sub']}.")
     try:
-        txns = db.query(Transaction).filter(Transaction.user_id == current_user["sub"]).all()
+        txns = db.query(Transaction.date).filter(Transaction.user_id == current_user["sub"]).all()
         months = {txn.date.strftime("%Y-%m") for txn in txns}
         sorted_months = sorted(list(months), reverse=True)
         logger.debug(f"Found transaction months: {sorted_months}")
     except Exception as e:
         logger.error(f"Error retrieving transaction range: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transaction range.")
-    return sorted_months
+    return {"dates": sorted_months}
 
 @router.post("/update", summary="Update a transaction's category")
 def update_transaction(update_request: UpdateTransactionRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):

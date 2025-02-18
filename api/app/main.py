@@ -26,4 +26,4 @@ app.include_router(transactions.router, prefix="/transactions", tags=["Transacti
 app.include_router(elastic.router, prefix="/elastic", tags=["ElasticSearch"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
