@@ -1,8 +1,6 @@
-import PieChart from "../components/PieChart";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 
-import axios from "axios";
+import PieChart from "../components/PieChart";
 import {
   Select,
   SelectContent,
@@ -11,49 +9,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Fetch transactions and categories from the backend
-const fetchTransactions = async (year: string, month: string) => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/transactions/expenses/${year}/${month}`
-  );
-  return response.data;
-};
-
-const fetchCategories = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/categories`
-  );
-  return response.data;
-};
-
-const fetchDates = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/transactions/range`
-  );
-  return response.data;
-};
+import { useFetchTransactionsTotalsByMonthQuery } from "@/hooks/api/useFetchTransactionsTotalsByMonthQuery";
+import { useFetchTransactionsDatesQuery } from "@/hooks/api/useFetchTransactionsDatesQuery";
 
 export default function ExpensesPage() {
+  // State to hold the selected year and month.
   const [yearMonth, setYearMonth] = useState({
-    year: `${new Date().getFullYear()}`,
-    month: `${new Date().getMonth() + 1}`,
+    year: String(new Date().getFullYear()),
+    month: String(new Date().getMonth() + 1),
   });
 
-  const setSelectedMonth = (value: string) => {
+  // Utility to format a year/month object into a string like "YYYY-MM".
+  const formatYearMonth = ({ year, month }: { year: string; month: string }) =>
+    `${year}-${String(month).padStart(2, "0")}`;
+
+  // Handler for when the month selection changes.
+  const handleMonthSelect = (value: string) => {
     const [year, month] = value.split("-");
-    setYearMonth({ year: year, month: month });
+    setYearMonth({ year, month });
   };
 
-  const { data: dates, isLoading: datesLoading } = useQuery({
-    queryKey: ["dates"],
-    queryFn: fetchDates,
-  });
+  // Fetch available transaction dates.
+  const {
+    data: dates = { dates: [] },
+    isLoading: datesLoading,
+    error: datesError,
+  } = useFetchTransactionsDatesQuery();
 
-  const getYearMonth = ({ year, month }: { year: string; month: string }) => {
-    return `${year}-${String(month).padStart(2, "0")}`;
-  };
+  // Fetch transaction totals for the selected month.
+  const {
+    data: totals = { totals: {} },
+    isLoading: transactionsLoading,
+    error: transactionsError,
+  } = useFetchTransactionsTotalsByMonthQuery(yearMonth.year, yearMonth.month);
 
-  const months_text = [
+  // Combine all loading states.
+  const isLoading = datesLoading || transactionsLoading;
+
+  // Check for Error data.
+  if (datesError || transactionsError) {
+    return <div>Error fetching data.</div>;
+  }
+
+  // Text labels for the months.
+  const monthLabels = [
     "January",
     "February",
     "March",
@@ -67,54 +66,36 @@ export default function ExpensesPage() {
     "November",
     "December",
   ];
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["transaction_totals", yearMonth],
-    queryFn: () => fetchTransactions(yearMonth.year, yearMonth.month),
-    placeholderData: keepPreviousData,
-  });
-
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
-
-  if (transactionsLoading || categoriesLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!transactions || !categories) {
-    return <div>Error fetching data.</div>;
-  }
-
-  if (datesLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
-    <div className="container mx-auto pl-4 mt-4">
-      <div className="flex justify-left items-center gap-4">
+    <div className="container mx-auto mt-4">
+      <div className="flex justify-start items-center gap-4 pl-4">
         <h1 className="text-2xl font-bold text-left">Charts</h1>
         {/* Month selection dropdown */}
-        <div>
-          <Select
-            onValueChange={setSelectedMonth}
-            defaultValue={getYearMonth(yearMonth)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a month" />
-            </SelectTrigger>
-            <SelectContent>
-              {dates.map((yearMonth: string) => (
-                <SelectItem key={yearMonth} value={yearMonth}>
-                  {months_text[parseInt(yearMonth.slice(5, 7)) - 1]}{" "}
-                  {yearMonth.slice(0, 4)}
+        <Select
+          onValueChange={handleMonthSelect}
+          defaultValue={formatYearMonth(yearMonth)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select a month" />
+          </SelectTrigger>
+          <SelectContent>
+            {dates.dates.map((yearMonthString: string) => {
+              const monthIndex = parseInt(yearMonthString.slice(5, 7), 10) - 1;
+              const year = yearMonthString.slice(0, 4);
+              return (
+                <SelectItem key={yearMonthString} value={yearMonthString}>
+                  {monthLabels[monthIndex]} {year}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {/* Loading spinner */}
+        {isLoading && <div className="text-gray-500">Loading...</div>}
       </div>
-      <PieChart transactions={transactions} />
+      {/* Render the pie chart with the fetched totals */}
+      <PieChart totals={totals.totals} />
     </div>
   );
 }

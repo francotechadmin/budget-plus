@@ -5,7 +5,7 @@ import type { ChartOptions } from "chart.js";
 // Register the required components from Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
 // Optional chart configuration
-const pieOptions: ChartOptions = {
+const pieOptions: ChartOptions<"doughnut"> = {
   responsive: true,
   plugins: {
     legend: {
@@ -14,10 +14,12 @@ const pieOptions: ChartOptions = {
   },
 };
 interface PieChartProps {
-  transactions: { [key: string]: number };
+  totals: Record<string, number>;
 }
 
-export default function PieChart({ transactions }: PieChartProps) {
+export default function PieChart({ totals }: PieChartProps) {
+  // if totals is empty, return chart with no data
+
   const getRandomColor = (num_of_colors: number) => {
     // get int value of colors in increments
     const colors = [];
@@ -30,19 +32,33 @@ export default function PieChart({ transactions }: PieChartProps) {
     return colors;
   };
 
-  const pieData = {
-    labels: Object.keys(transactions),
+  let pieData = {
+    labels: Object.keys(totals),
     datasets: [
       {
         label: "Transaction Amount",
-        data: Object.values(transactions),
-        backgroundColor: getRandomColor(Object.keys(transactions).length),
+        data: Object.values(totals),
+        backgroundColor: getRandomColor(Object.keys(totals).length),
       },
     ],
   };
 
+  // if totals is empty, return chart with no data
+  if (Object.keys(totals).length === 0) {
+    pieData = {
+      labels: ["No Data"],
+      datasets: [
+        {
+          label: "Transaction Amount",
+          data: [1],
+          backgroundColor: ["#e5e5e5"],
+        },
+      ],
+    };
+  }
+
   return (
-    <div className="container mx-auto pl-4 mt-4">
+    <div className="flex flex-col justify-center items-center mt-4 w-full max-h-[700px]">
       <Doughnut data={pieData} options={pieOptions} />
     </div>
   );
