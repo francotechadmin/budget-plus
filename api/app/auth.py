@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from jose.exceptions import JWTError
+import urllib3
 
 AUTH0_DOMAIN = "dev-gqc2uqr58a2eqikr.us.auth0.com"  # e.g., "your-tenant.auth0.com"
 API_AUDIENCE = "http://localhost:8000"   # e.g., "https://your-api/"
@@ -24,6 +25,8 @@ def verify_jwt(token: str) -> dict:
     """
     Verify the JWT token using Auth0's public keys.
     """
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     jsonurl = requests.get(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json", verify=False)
     jwks = jsonurl.json()
     unverified_header = jwt.get_unverified_header(token)
@@ -65,6 +68,8 @@ def get_user_info(token: str = Depends(get_token_auth_header)) -> dict:
 
     # verify the token first
     verify_jwt(token)
+
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     user_info_url = f"https://{AUTH0_DOMAIN}/userinfo"
     headers = {"Authorization": f"Bearer {token}"}
