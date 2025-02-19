@@ -9,22 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useFetchTransactionsTotalsByMonthQuery } from "@/hooks/api/useFetchTransactionsTotalsByMonthQuery";
 import { useFetchTransactionsDatesQuery } from "@/hooks/api/useFetchTransactionsDatesQuery";
-
-// Define month labels once
-const monthLabels = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+import { months_text } from "@/lib/constants";
 
 export default function ExpensesPage() {
   // Use a single string "YYYY-MM" for the selected month.
@@ -73,7 +58,7 @@ export default function ExpensesPage() {
               const monthIndex = parseInt(mon, 10) - 1;
               return (
                 <SelectItem key={dateString} value={dateString}>
-                  {monthLabels[monthIndex]} {yr}
+                  {months_text[monthIndex]} {yr}
                 </SelectItem>
               );
             })}
