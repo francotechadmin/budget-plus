@@ -8,12 +8,17 @@ interface FetchTransactionsByMonthQueryVariables {
   month: string;
 }
 
-const fetchTransactionsByMonth = async ({
+interface FetchTransactionsByMonthResponse {
+  income: number;
+  expenses: number;
+}
+
+const fetchTotalsByMonth = async ({
   year,
   month,
-}: FetchTransactionsByMonthQueryVariables): Promise<Record<string, number>> => {
-  const response = await axios.get<Record<string, number>>(
-    `/transactions/expenses/${year}/${month}`
+}: FetchTransactionsByMonthQueryVariables): Promise<FetchTransactionsByMonthResponse> => {
+  const response = await axios.get<FetchTransactionsByMonthResponse>(
+    `/transactions/totals/${year}/${month}`
   );
   return response.data;
 };
@@ -21,10 +26,14 @@ const fetchTransactionsByMonth = async ({
 export const useFetchTransactionsTotalsByMonthQuery = (
   year: string,
   month: string
-): UseQueryResult<Record<string, number>> => {
-  return useQuery<Record<string, number>, Error, Record<string, number>>({
-    queryKey: ["transactions", year, month],
-    queryFn: () => fetchTransactionsByMonth({ year, month }),
+): UseQueryResult<FetchTransactionsByMonthResponse> => {
+  return useQuery<
+    FetchTransactionsByMonthResponse,
+    Error,
+    FetchTransactionsByMonthResponse
+  >({
+    queryKey: ["totals", year, month],
+    queryFn: () => fetchTotalsByMonth({ year, month }),
     placeholderData: (prev) => prev,
     staleTime: 300000, // 5 minutes
   });
