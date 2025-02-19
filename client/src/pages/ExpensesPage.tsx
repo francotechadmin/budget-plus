@@ -1,15 +1,8 @@
 import { useState } from "react";
 import PieChart from "../components/PieChart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useFetchTransactionsTotalsByMonthQuery } from "@/hooks/api/useFetchTransactionsTotalsByMonthQuery";
+import { MonthSelect } from "../components/MonthSelect";
+import { useFetchExpensesByMonthQuery } from "@/hooks/api/useFetchExpensesByMonthQuery";
 import { useFetchTransactionsDatesQuery } from "@/hooks/api/useFetchTransactionsDatesQuery";
-import { months_text } from "@/lib/constants";
 
 export default function ExpensesPage() {
   // Use a single string "YYYY-MM" for the selected month.
@@ -30,17 +23,19 @@ export default function ExpensesPage() {
     error: datesError,
   } = useFetchTransactionsDatesQuery();
 
-  // Fetch totals for the selected month.
+  // Fetch expenses for the selected month.
   const {
-    data: totals = {},
-    isLoading: totalsLoading,
-    isFetching: totalsFetching,
-    error: totalsError,
-  } = useFetchTransactionsTotalsByMonthQuery(year, month);
+    data: expenses = {},
+    isLoading: expensesLoading,
+    isFetching: expensesFetching,
+    error: expensesError,
+  } = useFetchExpensesByMonthQuery(year, month);
 
-  const isLoading = datesLoading || totalsLoading || totalsFetching;
+  console.log(expenses);
 
-  if (datesError || totalsError) {
+  const isLoading = datesLoading || expensesLoading || expensesFetching;
+
+  if (datesError || expensesError) {
     return <div>Error fetching data.</div>;
   }
 
@@ -48,25 +43,14 @@ export default function ExpensesPage() {
     <div className="container mx-auto mt-4">
       <div className="flex items-center gap-4 pl-4">
         <h1 className="text-2xl font-bold">Charts</h1>
-        <Select onValueChange={handleMonthSelect} defaultValue={selectedMonth}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select a month" />
-          </SelectTrigger>
-          <SelectContent>
-            {dates.map((dateString: string) => {
-              const [yr, mon] = dateString.split("-");
-              const monthIndex = parseInt(mon, 10) - 1;
-              return (
-                <SelectItem key={dateString} value={dateString}>
-                  {months_text[monthIndex]} {yr}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+        <MonthSelect
+          selectedMonth={selectedMonth}
+          onMonthSelect={handleMonthSelect}
+          dates={dates}
+        />
         {isLoading && <div className="text-gray-500">Loading...</div>}
       </div>
-      <PieChart totals={totals} />
+      <PieChart expenses={expenses} />
     </div>
   );
 }

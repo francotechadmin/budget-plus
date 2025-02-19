@@ -14,13 +14,13 @@ const pieOptions: ChartOptions<"doughnut"> = {
   },
 };
 interface PieChartProps {
-  totals: {
+  expenses: {
     [key: string]: number;
   };
 }
 
-export default function PieChart({ totals }: PieChartProps) {
-  // if totals is empty, return chart with no data
+export default function PieChart({ expenses }: PieChartProps) {
+  // if expenses is empty, return chart with no data
 
   const getRandomColor = (num_of_colors: number) => {
     // get int value of colors in increments
@@ -34,8 +34,8 @@ export default function PieChart({ totals }: PieChartProps) {
     return colors;
   };
   let pieData;
-  // if totals is empty, return chart with no data
-  if (!totals || Object.keys(totals).length === 0) {
+  // if expenses is empty, return chart with no data
+  if (!expenses || Object.keys(expenses).length === 0) {
     pieData = {
       labels: ["No Data"],
       datasets: [
@@ -48,12 +48,12 @@ export default function PieChart({ totals }: PieChartProps) {
     };
   } else {
     pieData = {
-      labels: Object.keys(totals),
+      labels: Object.keys(expenses),
       datasets: [
         {
           label: "Transaction Amount",
-          data: Object.values(totals),
-          backgroundColor: getRandomColor(Object.keys(totals).length),
+          data: Object.values(expenses),
+          backgroundColor: getRandomColor(Object.keys(expenses).length),
         },
       ],
     };
