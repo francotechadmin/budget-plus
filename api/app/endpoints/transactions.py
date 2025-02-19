@@ -241,7 +241,7 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
     for section, cats in sorted(grouped.items()):
         sorted_grouped[section] = cats
     logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
-    return {"transactions": sorted_grouped}
+    return sorted_grouped
 
 @router.get("/expenses/{year}/{month}", summary="Get expense totals for a month")
 def get_transactions_expenses(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
@@ -279,7 +279,7 @@ def get_transactions_expenses(year: int, month: int, db: Session = Depends(get_d
         totals.setdefault(category_name, 0)
         totals[category_name] += txn.amount
     logger.info(f"Returning expense totals for {year}-{month:02d}.")
-    return {"totals": totals}
+    return totals
 
 @router.get("/totals/{year}/{month}", summary="Get income and expenses totals for a month")
 def get_transactions_totals(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
@@ -376,7 +376,7 @@ def get_transactions_range(db: Session = Depends(get_db), current_user: dict = D
     except Exception as e:
         logger.error(f"Error retrieving transaction range: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transaction range.")
-    return {"dates": sorted_months}
+    return sorted_months
 
 @router.post("/update", summary="Update a transaction's category")
 def update_transaction(update_request: UpdateTransactionRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
