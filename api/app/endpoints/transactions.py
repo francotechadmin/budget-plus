@@ -6,7 +6,7 @@ import pandas as pd
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, case
 
 # Import dependencies
 from ..database.database import get_db
@@ -287,44 +287,52 @@ def get_transactions_expenses(
     return totals
 
 @router.get("/totals/{year}/{month}", summary="Get income and expenses totals for a month")
-def get_transactions_totals(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def get_transactions_totals(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     """
     Returns the total income and total expenses for the specified month.
+    Income is determined by transactions whose category's section is 'Income';
+    all other transactions are treated as expenses.
     """
-    logger.info(f"Calculating income and expense totals for user {current_user['sub']} for {year}-{month:02d}.")
+    logger.info(f"Calculating totals for user {current_user['sub']} for {year}-{month:02d}.")
+    
     start_date = f"{year}-{month:02d}-01"
     last_day = calendar.monthrange(year, month)[1]
     end_date = f"{year}-{month:02d}-{last_day}"
     
     try:
-        txns = (
-            db.query(Transaction)
-            .join(Category)
-            .join(Section)
-            .filter(
-                Transaction.date >= start_date,
-                Transaction.date <= end_date,
-                Transaction.user_id == current_user["sub"]
-            )
-            .all()
-        )
-        logger.debug(f"Found {len(txns)} transactions for totals calculation.")
+        totals = db.query(
+            func.sum(
+                case(
+                    (Section.name == 'Income', Transaction.amount),
+                    else_=0
+                )
+            ).label("income"),
+            func.sum(
+                case(
+                    (Section.name != 'Income', Transaction.amount),
+                    else_=0
+                )
+            ).label("expenses")
+        ).join(Category, Transaction.category_id == Category.id
+        ).join(Section, Category.section_id == Section.id
+        ).filter(
+            Transaction.date.between(start_date, end_date),
+            Transaction.user_id == current_user["sub"]
+        ).one()
+        
+        income_total = totals.income or 0
+        expenses_total = totals.expenses or 0
+        logger.info(f"Income: {income_total}, Expenses: {expenses_total} for {year}-{month:02d}.")
+        return {"income": income_total, "expenses": expenses_total}
     except Exception as e:
-        logger.error(f"Error retrieving transactions totals: {e}")
+        logger.error(f"Error retrieving totals: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving totals.")
-    
-    income_total = sum(
-        txn.amount 
-        for txn in txns 
-        if txn.category and txn.category.section and txn.category.section.name == 'Income'
-    )
-    expenses_total = sum(
-        txn.amount 
-        for txn in txns 
-        if not (txn.category and txn.category.section and txn.category.section.name == 'Income')
-    )
-    logger.info(f"Income total: {income_total}, Expenses total: {expenses_total} for {year}-{month:02d}.")
-    return {"income": income_total, "expenses": expenses_total}
+
 
 @router.get("/history", summary="Get transaction history for the last six months")
 def get_transactions_history(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
