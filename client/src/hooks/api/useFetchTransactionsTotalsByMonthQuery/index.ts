@@ -25,5 +25,7 @@ export const useFetchTransactionsTotalsByMonthQuery = (
   return useQuery<Record<string, number>, Error, Record<string, number>>({
     queryKey: ["transactions", year, month],
     queryFn: () => fetchTransactionsByMonth({ year, month }),
+    placeholderData: (prev) => prev,
+    staleTime: 300000, // 5 minutes
   });
 };
