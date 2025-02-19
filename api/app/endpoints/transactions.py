@@ -244,18 +244,6 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
     logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
     return sorted_grouped
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-import calendar, logging
-
-from ..database.database import get_db
-from ..models.models import Transaction, Category, Section
-from ..auth import get_current_user
-
-logger = logging.getLogger(__name__)
-router = APIRouter()
-
 @router.get("/expenses/{year}/{month}", summary="Get expense totals for a month")
 def get_transactions_expenses(
     year: int,
