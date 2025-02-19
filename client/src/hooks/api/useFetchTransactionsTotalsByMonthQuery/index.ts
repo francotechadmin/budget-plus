@@ -3,11 +3,6 @@
 import axios from "axios";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 // import { Transaction } from "@/models/transactions";
-
-interface FetchTransactionsByMonthResponse {
-  totals: Record<string, number>;
-}
-
 interface FetchTransactionsByMonthQueryVariables {
   year: string;
   month: string;
@@ -16,8 +11,8 @@ interface FetchTransactionsByMonthQueryVariables {
 const fetchTransactionsByMonth = async ({
   year,
   month,
-}: FetchTransactionsByMonthQueryVariables): Promise<FetchTransactionsByMonthResponse> => {
-  const response = await axios.get<FetchTransactionsByMonthResponse>(
+}: FetchTransactionsByMonthQueryVariables): Promise<Record<string, number>> => {
+  const response = await axios.get<Record<string, number>>(
     `/transactions/expenses/${year}/${month}`
   );
   return response.data;
@@ -26,12 +21,8 @@ const fetchTransactionsByMonth = async ({
 export const useFetchTransactionsTotalsByMonthQuery = (
   year: string,
   month: string
-): UseQueryResult<FetchTransactionsByMonthResponse> => {
-  return useQuery<
-    FetchTransactionsByMonthResponse,
-    Error,
-    FetchTransactionsByMonthResponse
-  >({
+): UseQueryResult<Record<string, number>> => {
+  return useQuery<Record<string, number>, Error, Record<string, number>>({
     queryKey: ["transactions", year, month],
     queryFn: () => fetchTransactionsByMonth({ year, month }),
   });
