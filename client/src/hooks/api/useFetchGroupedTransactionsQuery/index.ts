@@ -1,6 +1,7 @@
 // src/hooks/api/useFetchGroupedTransactionsQuery/index.ts
 
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { GroupedTransaction } from "@/models/groupedTransactions";
 import axios from "axios";
 
 interface FetchGroupedTransactionsQueryVariables {
@@ -8,15 +9,11 @@ interface FetchGroupedTransactionsQueryVariables {
   month: string;
 }
 
-interface FetchGroupedTransactionsQueryResponse {
-  [key: string]: number;
-}
-
 const fetchGroupedTransactions = async ({
   year,
   month,
-}: FetchGroupedTransactionsQueryVariables): Promise<FetchGroupedTransactionsQueryResponse> => {
-  const response = await axios.get<FetchGroupedTransactionsQueryResponse>(
+}: FetchGroupedTransactionsQueryVariables): Promise<GroupedTransaction[]> => {
+  const response = await axios.get<GroupedTransaction[]>(
     `/transactions/grouped/${year}/${month}`
   );
   return response.data;
@@ -25,13 +22,11 @@ const fetchGroupedTransactions = async ({
 export const useFetchGroupedTransactionsQuery = (
   year: string,
   month: string
-): UseQueryResult<FetchGroupedTransactionsQueryResponse> => {
-  return useQuery<
-    FetchGroupedTransactionsQueryResponse,
-    Error,
-    FetchGroupedTransactionsQueryResponse
-  >({
+): UseQueryResult<GroupedTransaction[]> => {
+  return useQuery<GroupedTransaction[], Error, GroupedTransaction[]>({
     queryKey: ["groupedTransactions", year, month],
     queryFn: () => fetchGroupedTransactions({ year, month }),
+    placeholderData: (prev) => prev,
+    staleTime: 1000 * 60 * 60,
   });
 };
