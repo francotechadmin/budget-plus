@@ -14,7 +14,9 @@ const pieOptions: ChartOptions<"doughnut"> = {
   },
 };
 interface PieChartProps {
-  totals: Record<string, number>;
+  totals: {
+    [key: string]: number;
+  };
 }
 
 export default function PieChart({ totals }: PieChartProps) {
@@ -31,20 +33,9 @@ export default function PieChart({ totals }: PieChartProps) {
     }
     return colors;
   };
-
-  let pieData = {
-    labels: Object.keys(totals),
-    datasets: [
-      {
-        label: "Transaction Amount",
-        data: Object.values(totals),
-        backgroundColor: getRandomColor(Object.keys(totals).length),
-      },
-    ],
-  };
-
+  let pieData;
   // if totals is empty, return chart with no data
-  if (Object.keys(totals).length === 0) {
+  if (!totals || Object.keys(totals).length === 0) {
     pieData = {
       labels: ["No Data"],
       datasets: [
@@ -52,6 +43,17 @@ export default function PieChart({ totals }: PieChartProps) {
           label: "Transaction Amount",
           data: [1],
           backgroundColor: ["#e5e5e5"],
+        },
+      ],
+    };
+  } else {
+    pieData = {
+      labels: Object.keys(totals),
+      datasets: [
+        {
+          label: "Transaction Amount",
+          data: Object.values(totals),
+          backgroundColor: getRandomColor(Object.keys(totals).length),
         },
       ],
     };
