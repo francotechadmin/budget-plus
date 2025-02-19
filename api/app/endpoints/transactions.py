@@ -199,7 +199,12 @@ async def upload_bank_transactions(
     return get_transactions(db, current_user)
 
 @router.get("/{year}/{month}", summary="Get transactions for a specific month")
-def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def get_transactions_by_month(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     """
     Retrieve transactions for a given month, grouped by section and category.
     """
@@ -210,37 +215,47 @@ def get_transactions_by_month(year: int, month: int, db: Session = Depends(get_d
     
     try:
         rows = (
-            db.query(Transaction, Category.name, Section.name)
+            db.query(
+                Section.name.label("section"),
+                Category.name.label("category"),
+                Transaction.id,
+                Transaction.description,
+                Transaction.date,
+                Transaction.amount
+            )
             .join(Category, Transaction.category_id == Category.id)
             .join(Section, Category.section_id == Section.id)
             .filter(
-                Transaction.date >= start_date,
-                Transaction.date <= end_date,
+                Transaction.date.between(start_date, end_date),
                 Transaction.user_id == current_user["sub"]
             )
+            .order_by(Section.name, Category.name, Transaction.date)
             .all()
         )
         logger.debug(f"Found {len(rows)} transactions for {year}-{month:02d} for user {current_user['sub']}.")
     except Exception as e:
-        logger.error(f"Error retrieving transactions by month: {e}")
+        logger.error(f"Error retrieving transactions: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transactions for the specified month.")
-    
+
+    # Build nested grouping: { section: { category: [transactions...] } }
     grouped = {}
     for row in rows:
-        txn, category_name, section_name = row
-        grouped.setdefault(section_name, {}).setdefault(category_name, []).append({
-            "id": txn.id,
-            "description": txn.description,
-            "date": txn.date,
-            "amount": txn.amount,
+        section, category, txn_id, description, date, amount = row
+        grouped.setdefault(section, {}).setdefault(category, []).append({
+            "id": txn_id,
+            "description": description,
+            "date": date,
+            "amount": amount,
         })
     
-    # Optionally, move the "Income" section to the top of the result.
-    sorted_grouped = {}
+    # Optionally, place "Income" first in the returned object.
     if "Income" in grouped:
-        sorted_grouped["Income"] = grouped.pop("Income")
-    for section, cats in sorted(grouped.items()):
-        sorted_grouped[section] = cats
+        sorted_grouped = {"Income": grouped.pop("Income")}
+    else:
+        sorted_grouped = {}
+    for section in sorted(grouped):
+        sorted_grouped[section] = grouped[section]
+
     logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
     return sorted_grouped
 
@@ -333,6 +348,118 @@ def get_transactions_totals(
         logger.error(f"Error retrieving totals: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving totals.")
 
+@router.get("/grouped/{year}/{month}", summary="Get grouped transactions for a specific month")
+def get_grouped_transactions(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Retrieves transactions for the given month, grouped by section and category.
+    Each group includes a computed total for that category and section.
+    
+    Response example:
+    [
+      {
+        "section": "Entertainment",
+        "total": -18.38,
+        "categories": [
+          {
+            "name": "Subscriptions",
+            "total": -18.38,
+            "transactions": [
+              {
+                "id": 4082,
+                "description": "APPLE.COM/BILL ...",
+                "date": "2025-02-03T00:00:00",
+                "amount": -18.38
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "section": "Housing",
+        "total": -1500.00,
+        "categories": [
+          {
+            "name": "Rent",
+            "total": -1500.00,
+            "transactions": [
+              { "id": 4085, "description": "Rent payment", "date": "2025-02-03T00:00:00", "amount": -1500.0 }
+            ]
+          }
+        ]
+      }
+    ]
+    """
+    logger.info(f"User {current_user['sub']} requested grouped transactions for {year}-{month:02d}.")
+    try:
+        start_date = f"{year}-{month:02d}-01"
+        last_day = calendar.monthrange(year, month)[1]
+        end_date = f"{year}-{month:02d}-{last_day}"
+        
+        # Retrieve all transactions for the period, joined with category and section names.
+        rows = (
+            db.query(
+                Transaction,
+                Category.name.label("category_name"),
+                Section.name.label("section_name")
+            )
+            .join(Category, Transaction.category_id == Category.id)
+            .join(Section, Category.section_id == Section.id)
+            .filter(
+                Transaction.date.between(start_date, end_date),
+                Transaction.user_id == current_user["sub"]
+            )
+            .order_by(Section.name, Category.name, Transaction.date)
+            .all()
+        )
+    except Exception as e:
+        logger.error(f"Error retrieving transactions: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving transactions.")
+    
+    # Group transactions into a nested structure:
+    grouped = {}
+    for txn, cat_name, sec_name in rows:
+        # Initialize section group if needed.
+        if sec_name not in grouped:
+            grouped[sec_name] = {}
+        # Initialize category group within this section if needed.
+        if cat_name not in grouped[sec_name]:
+            grouped[sec_name][cat_name] = []
+        # Append transaction data.
+        grouped[sec_name][cat_name].append({
+            "id": txn.id,
+            "description": txn.description,
+            "date": txn.date.isoformat(),
+            "amount": txn.amount,
+        })
+    
+    # Build final response with totals computed.
+    final_result = []
+    for sec_name, categories_data in grouped.items():
+        section_total = 0
+        category_list = []
+        for cat_name, txns in categories_data.items():
+            category_total = sum(txn["amount"] for txn in txns)
+            section_total += category_total
+            category_list.append({
+                "name": cat_name,
+                "total": category_total,
+                "transactions": txns
+            })
+        final_result.append({
+            "section": sec_name,
+            "total": section_total,
+            "categories": category_list
+        })
+    
+    # Optionally, sort final_result (e.g. alphabetically by section)
+    final_result.sort(key=lambda x: x["section"])
+    logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
+    return final_result
 
 @router.get("/history", summary="Get transaction history for the last six months")
 def get_transactions_history(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
