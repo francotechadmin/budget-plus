@@ -474,7 +474,7 @@ def get_transactions_history(db: Session = Depends(get_db), current_user: dict =
         rows = (
             db.query(Transaction, Category.name, Section.name)
             .join(Category, Transaction.category_id == Category.id)
-            .join(Section, Transaction.category_id == Category.id)
+            .join(Section, Section.id == Category.section_id)
             .filter(
                 Transaction.date >= six_months_ago,
                 Transaction.user_id == current_user["sub"],
@@ -493,10 +493,11 @@ def get_transactions_history(db: Session = Depends(get_db), current_user: dict =
         key = txn.date.strftime("%B %Y")
         if key not in history:
             history[key] = {"income": 0, "expenses": 0}
-        if category_name and section_name and section_name == 'Income':
+        if section_name == 'Income':
             history[key]["income"] += txn.amount
         else:
             history[key]["expenses"] += txn.amount
+
     # Sort history by date
     history = dict(sorted(history.items(), key=lambda x: pd.to_datetime(x[0])))
     logger.info("Returning transaction history.")
