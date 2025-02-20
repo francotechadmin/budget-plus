@@ -1,6 +1,11 @@
 // src/hooks/api/useDeleteTransactionMutation/index.ts
 import axios from "axios";
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { Transaction } from "@/models/transactions";
 
 interface DeleteProjectResponse {
   message: string;
@@ -20,10 +25,28 @@ export const useDeleteTransactionMutation = (): UseMutationResult<
   Error,
   string
 > => {
+  const queryClient = useQueryClient();
   return useMutation<DeleteProjectResponse, Error, string>({
     mutationFn: deleteProjectFn,
+    onMutate: async (transactionId) => {
+      const previousData = queryClient.getQueryData(["transactions"]);
+
+      // Optimistically update the cache
+      if (previousData) {
+        queryClient.setQueryData(["transactions"], (oldData: Transaction[]) =>
+          oldData.filter(
+            (transaction: Transaction) => transaction.id !== transactionId
+          )
+        );
+      }
+
+      return { previousData };
+    },
     onSuccess: (data) => {
       console.log("Project deleted successfully:", data);
+
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["groupedTransactions"] });
     },
     onError: (error) => {
       console.error("Error deleting project:", error);
