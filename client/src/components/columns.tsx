@@ -15,8 +15,9 @@ import { CategoryDropdown } from "./CategoryDropdown";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { Transaction } from "@/models/transactions";
 import { Sections } from "@/models/sections";
+import { CategoryFilter } from "./CategoryFilter";
 
-// Define the columns for the transaction table, passing sections from props
+// Define the columns for the transaction table.
 export const createColumns = (
   sections: Sections,
   deleteMutationHandler: (id: string) => void
@@ -36,7 +37,6 @@ export const createColumns = (
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount" />
     ),
-
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
       const formatted = new Intl.NumberFormat("en-US", {
@@ -48,7 +48,9 @@ export const createColumns = (
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: ({ column }) => (
+      <CategoryFilter column={column} sections={sections} />
+    ),
     cell: ({ row }) => {
       const transaction = row.original;
       return (
@@ -64,7 +66,6 @@ export const createColumns = (
     id: "actions",
     cell: ({ row }) => {
       const transaction = row.original;
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
