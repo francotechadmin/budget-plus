@@ -627,8 +627,11 @@ async def import_bank_transactions(
       - description
       - amount
       - category
-    
-    The endpoint uses the file extension to determine how to read the file.
+
+    Before processing, this endpoint pings Elasticsearch. If available,
+    it uses Elasticsearch to automatically determine the category based on the transaction description.
+    If ES is unavailable or does not return a category, it falls back to the provided category.
+    If that category is not found, the transaction is categorized as "Unknown".
     """
     logger.info(f"User {current_user['sub']} is importing transactions from file: {file.filename}")
     new_transactions = []
@@ -640,7 +643,6 @@ async def import_bank_transactions(
         try:
             contents = await file.read()
             logger.debug("Reading CSV file content.")
-            # Decode CSV content (assuming UTF-8) and wrap in StringIO
             df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
         except Exception as e:
             logger.error(f"Error reading CSV file {file.filename}: {e}")
@@ -649,7 +651,6 @@ async def import_bank_transactions(
         try:
             contents = await file.read()
             logger.debug("Reading Excel file content.")
-            # Wrap the bytes in BytesIO for Excel
             df = pd.read_excel(io.BytesIO(contents))
         except Exception as e:
             logger.error(f"Error reading Excel file {file.filename}: {e}")
@@ -671,35 +672,75 @@ async def import_bank_transactions(
         )
     logger.debug(f"File {file.filename} contains all required columns.")
     
+    # Instantiate the Elasticsearch searcher and check availability.
+    searcher = Searcher()
+    try:
+        es_available = searcher.ping()
+        logger.info("Elasticsearch is available.")
+    except Exception as e:
+        es_available = False
+        logger.error(f"Elasticsearch ping failed: {e}. Falling back to file-provided categories.")
+
     # Process each row of the DataFrame
     for idx, row in df.iterrows():
+        # check for required fields
+        if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']):
+            logger.warning(f"Row {idx} is missing required fields. Skipping.")
+            continue
+
         logger.debug(f"Processing row {idx} of file {file.filename}.")
-        # Lookup the category for the current user by name
+
+        # Attempt to get an automatic category using Elasticsearch if available.
+        annotated_category = None
+        if es_available:
+            try:
+                es_result = searcher.execute_search(
+                    field="description",
+                    shoulds=[row['description']]
+                )
+                hits = es_result.get("hits", {}).get("hits", [])
+                if hits:
+                    annotated_category = hits[0]["_source"].get("annotated_category")
+                    logger.debug(f"Row {idx}: ES annotated category: {annotated_category}")
+            except Exception as e:
+                logger.error(f"Error during Elasticsearch search for row {idx}: {e}")
+                annotated_category = None
+
+        # Use the annotated category if available; otherwise fall back to the file's category.
+        if annotated_category:
+            final_category = annotated_category
+        elif pd.notna(row['category']):
+            final_category = row['category']
+        else:
+            logger.warning(f"Row {idx}: No category found. Using 'Unknown'.")
+            final_category = "Unknown"
+
+        # Look up the Category in our database for the current user.
         cat_entry = (
             db.query(Category)
-            .filter(Category.name == row['category'], Category.user_id == current_user["sub"])
+            .filter(Category.name == final_category, Category.user_id == current_user["sub"])
             .first()
         )
         if not cat_entry:
-            logger.warning(f"Category {row['category']} not found for row {idx}. Trying 'Uncategorized'.")
+            logger.warning(f"Category '{final_category}' not found for row {idx}. Using 'Unknown'.")
             cat_entry = (
                 db.query(Category)
-                .filter(Category.name == "Uncategorized", Category.user_id == current_user["sub"])
+                .filter(Category.name == "Unknown", Category.user_id == current_user["sub"])
                 .first()
             )
             if not cat_entry:
-                logger.info("Creating default 'Uncategorized' category.")
+                logger.info("Creating default 'Unknown' category.")
                 cat_entry = Category(
                     user_id=current_user["sub"],
                     section_id=None,  # Adjust if you want to assign a default section
-                    name="Uncategorized",
-                    description="Default uncategorized transactions"
+                    name="Unknown",
+                    description="Fallback category when no match is found"
                 )
                 db.add(cat_entry)
                 db.commit()
                 db.refresh(cat_entry)
         
-        # Check for duplicate transactions by matching description, date, amount, and category
+        # Check for duplicate transactions.
         existing_txn = (
             db.query(Transaction)
             .filter(
@@ -715,7 +756,7 @@ async def import_bank_transactions(
             logger.debug(f"Duplicate transaction found for row {idx}. Skipping.")
             continue
         
-        # Create a new Transaction record
+        # Create a new Transaction record.
         new_txn = Transaction(
             user_id=current_user["sub"],
             description=row['description'],
@@ -737,6 +778,5 @@ async def import_bank_transactions(
     else:
         logger.info("No new transactions were found in the import file.")
     
-    # Return updated transactions for the current user.
     from .transactions import get_transactions  
     return get_transactions(db, current_user)

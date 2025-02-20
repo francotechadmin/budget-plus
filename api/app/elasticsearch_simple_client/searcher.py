@@ -13,6 +13,13 @@ class Searcher:
 
         self._es_connecter = Elasticsearch([es_url], timeout=60)
 
+    def ping(self):
+        try:
+            return self._es_connecter.ping()
+        except Exception as e:
+            print(f"Error pinging Elasticsearch: {e}")
+            return False    
+
     def execute_search(self, field: str,
                        musts: list = None,
                        shoulds: list = None,
