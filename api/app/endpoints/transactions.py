@@ -246,6 +246,8 @@ def get_transactions_by_month(
             "description": description,
             "date": date,
             "amount": amount,
+            "category": category,
+            "section": section
         })
     
     # Optionally, place "Income" first in the returned object.
@@ -435,6 +437,8 @@ def get_grouped_transactions(
             "description": txn.description,
             "date": txn.date.isoformat(),
             "amount": txn.amount,
+            "category": cat_name,
+            "section": sec_name
         })
     
     # Build final response with totals computed.
