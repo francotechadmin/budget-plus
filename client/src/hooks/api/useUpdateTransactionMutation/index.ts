@@ -1,13 +1,11 @@
 // src/hooks/api/useUpdateTransactionMutation/index.ts
 import axios from "axios";
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Transaction } from "@/models/transactions";
-
-interface UpdateTransactionResponse {
-  message: string;
-  transaction: Transaction;
-}
-
 interface UpdateTransactionMutationVariables {
   id: string;
   category: string;
@@ -16,30 +14,32 @@ interface UpdateTransactionMutationVariables {
 const updateTransactionFn = async ({
   id,
   category,
-}: UpdateTransactionMutationVariables): Promise<UpdateTransactionResponse> => {
-  const response = await axios.post<UpdateTransactionResponse>(
-    `transactions/update`,
-    {
-      transaction_id: id,
-      category: category,
-    }
-  );
+}: UpdateTransactionMutationVariables): Promise<Transaction> => {
+  const response = await axios.post<Transaction>(`transactions/update`, {
+    transaction_id: id,
+    category: category,
+  });
   return response.data;
 };
 
 export const useUpdateTransactionMutation = (): UseMutationResult<
-  UpdateTransactionResponse,
+  Transaction,
   Error,
   UpdateTransactionMutationVariables
 > => {
-  return useMutation<
-    UpdateTransactionResponse,
-    Error,
-    UpdateTransactionMutationVariables
-  >({
+  const queryClient = useQueryClient();
+  return useMutation<Transaction, Error, UpdateTransactionMutationVariables>({
     mutationFn: updateTransactionFn,
-    onSuccess: (data) => {
+    onSuccess: (data: Transaction) => {
       console.log("Transaction updated successfully:", data);
+      // Optionally invalidate queries or update local state here
+      const dateString = String(data.date);
+      const year = dateString.split("-")[0];
+      const month = dateString.split("-")[1];
+      // Invalidate queries related to transactions
+      queryClient.invalidateQueries({
+        queryKey: ["groupedTransactions", year, month],
+      });
     },
     onError: (error) => {
       console.error("Error updating transaction:", error);
