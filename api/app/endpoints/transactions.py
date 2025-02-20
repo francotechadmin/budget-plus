@@ -569,8 +569,25 @@ def update_transaction(update_request: UpdateTransactionRequest, db: Session = D
         logger.debug("Elasticsearch updated for transaction change.")
     except Exception as e:
         logger.error(f"Error updating Elasticsearch: {e}")
+        raise HTTPException(status_code=500, detail="Error updating Elasticsearch.")
     
-    return get_transactions(db, current_user)
+    # Return updated transaction 
+    updated_txn = db.query(Transaction).filter(
+        Transaction.id == update_request.transaction_id,
+        Transaction.user_id == current_user["sub"]
+    ).first()
+    if not updated_txn:
+        logger.warning(f"Transaction {update_request.transaction_id} not found after update.")
+        raise HTTPException(status_code=404, detail="Transaction not found.")
+    response = {
+        "id": updated_txn.id,
+        "description": updated_txn.description,
+        "date": updated_txn.date,
+        "amount": updated_txn.amount,
+        "category": update_request.category
+    }
+    logger.info(f"Returning updated transaction {update_request.transaction_id}.")
+    return response
 
 @router.delete("/{transaction_id}", summary="Delete a transaction")
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
