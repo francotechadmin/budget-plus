@@ -31,8 +31,6 @@ export default function ExpensesPage() {
     error: expensesError,
   } = useFetchExpensesByMonthQuery(year, month);
 
-  console.log(expenses);
-
   const isLoading = datesLoading || expensesLoading || expensesFetching;
 
   if (datesError || expensesError) {
