@@ -41,6 +41,7 @@ def get_transactions(
             .join(Category, Transaction.category_id == Category.id)
             .join(Section, Category.section_id == Section.id)
             .filter(Transaction.user_id == current_user["sub"])
+            .order_by(Transaction.date.desc())
             .all()
         )
         logger.debug(f"Fetched {len(txns)} transactions for user {current_user['sub']}.")
