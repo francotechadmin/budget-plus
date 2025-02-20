@@ -27,6 +27,5 @@ export const useFetchGroupedTransactionsQuery = (
     queryKey: ["groupedTransactions", year, month],
     queryFn: () => fetchGroupedTransactions({ year, month }),
     placeholderData: (prev) => prev,
-    staleTime: 1000 * 60 * 60,
   });
 };

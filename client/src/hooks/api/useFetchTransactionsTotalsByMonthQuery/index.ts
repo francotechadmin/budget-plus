@@ -35,6 +35,5 @@ export const useFetchTransactionsTotalsByMonthQuery = (
     queryKey: ["totals", year, month],
     queryFn: () => fetchTotalsByMonth({ year, month }),
     placeholderData: (prev) => prev,
-    staleTime: 300000, // 5 minutes
   });
 };

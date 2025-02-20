@@ -15,6 +15,5 @@ export const useFetchTransactionsDatesQuery = (): UseQueryResult<string[]> => {
     queryKey: ["dates"],
     queryFn: fetchDates,
     placeholderData: (prev) => prev,
-    staleTime: 1000 * 60 * 60,
   });
 };
