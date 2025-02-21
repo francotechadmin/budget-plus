@@ -1,5 +1,4 @@
-// BarChartVertical.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -31,45 +30,68 @@ interface BarChartVerticalProps {
 }
 
 const BarChartVertical: React.FC<BarChartVerticalProps> = ({ monthlyData }) => {
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // adjust breakpoint if needed
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Prepare the data for the bar chart
   const data = {
-    labels: Object.keys(monthlyData), // Months as labels
+    labels: Object.keys(monthlyData),
     datasets: [
       {
         label: "Income",
-        data: Object.values(monthlyData).map((data) => data.income), // Income data
-        backgroundColor: "#36A2EB", // Blue color for income
+        data: Object.values(monthlyData).map((data) => data.income),
+        backgroundColor: "#36A2EB",
       },
       {
         label: "Expenses",
-        data: Object.values(monthlyData).map((data) => data.expenses), // Expenses data
-        backgroundColor: "#FF6384", // Red color for expenses
+        data: Object.values(monthlyData).map((data) => data.expenses),
+        backgroundColor: "#FF6384",
       },
     ],
   };
 
-  // Chart options to enable stacked bars
+  // Adjust options based on mobile view
   const options = {
+    indexAxis: isMobile ? ("y" as const) : ("x" as const),
+    maintainAspectRatio: isMobile ? false : true,
+    aspectRatio: isMobile ? 1 : 2,
+    responsive: true,
     scales: {
       y: {
-        beginAtZero: true, // Ensure the y-axis starts at 0
-        stacked: true, // Enable stacking on the y-axis
+        beginAtZero: true,
+        stacked: true,
       },
       x: {
-        stacked: true, // Enable stacking on the x-axis
+        stacked: true,
       },
     },
     plugins: {
       legend: {
-        display: true, // Show the legend
+        display: true,
       },
     },
-    responsive: true, // Make the chart responsive
-    // maintainAspectRatio: false, // Allow for a responsive chart without fixed aspect ratio
-    barThickness: 50, // Adjust the bar thickness
+    barThickness: 20, // Adjust bar thickness for mobile
   };
 
-  return <Bar data={data} options={options} />;
+  // Increase container height on mobile for a larger chart
+  const containerStyle = isMobile
+    ? { height: "500px", width: "100%" }
+    : { height: "600px", width: "100%" };
+
+  return (
+    <div style={containerStyle}>
+      <Bar data={data} options={options} />
+    </div>
+  );
 };
 
 export default BarChartVertical;

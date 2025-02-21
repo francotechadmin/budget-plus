@@ -63,7 +63,7 @@ const BarChart: React.FC<BarChartProps> = ({ income, expenses }) => {
     height: 400, // Set the height of the chart
   };
 
-  return <Bar data={data} options={options} height={35} />;
+  return <Bar data={data} options={options} height={50} />;
 };
 
 export default BarChart;

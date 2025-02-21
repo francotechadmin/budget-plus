@@ -27,84 +27,180 @@ import Loading from "./components/ui/loading.tsx";
 import { useEffect } from "react";
 import { addAccessTokenInterceptor } from "./lib/axios.ts";
 import { useUpsertUserMutation } from "./hooks/api/useUserUpsertMutation/index.ts";
+import { useState } from "react";
+import { Moon, LogOut, Menu, X } from "lucide-react";
 
 const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <div className="py-2 px-4 flex gap-2 justify-between items-center">
-        <div className="flex ">
-          {/* logo Budget+ */}
-          <div className="flex items-center px-2">
-            <Notebook className="h-6 w-6" />
-            <span className="font-bold text-2xl px-1">Budget+</span>
+  component: function RootComponent() {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    return (
+      <>
+        <div className="py-2 px-4 flex gap-2 justify-between items-center">
+          <div className="flex items-center">
+            {/* Logo */}
+            <div className="flex items-center px-2">
+              <Notebook className="h-6 w-6" />
+              <span className="font-bold text-2xl px-1">Budget+</span>
+            </div>
+
+            {/* Desktop Navigation Menu */}
+            <div className="hidden sm:block">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      asChild
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to="/">Transactions</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      asChild
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to="/expenses">Expenses</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      asChild
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to="/budget">Budget</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink
+                      asChild
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to="/history">History</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+
+            {/* Mobile Hamburger Menu Button */}
+            <div className="sm:hidden ml-2">
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0 flex items-center justify-center"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
 
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link to="/">Transactions</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link to="/charts">Expenses</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link to="/budget">Budget</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  className={navigationMenuTriggerStyle()}
-                >
-                  <Link to="/analysis">History</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            {/* Toggle Mode Button */}
+            {/* Full text on desktop */}
+            <Button
+              variant="outline"
+              className="h-8 hidden sm:flex items-center"
+              onClick={() => document.body.classList.toggle("dark")}
+            >
+              Toggle Mode
+            </Button>
+            {/* Icon-only on mobile */}
+            <Button
+              variant="outline"
+              className="h-8 sm:hidden p-2 flex items-center justify-center"
+              onClick={() => document.body.classList.toggle("dark")}
+            >
+              <Moon className="h-4 w-4" />
+            </Button>
+
+            {/* Logout Button */}
+            {/* Full text on desktop */}
+            <Button
+              variant="outline"
+              className="h-8 hidden p-2 sm:flex items-center"
+              onClick={() => (window.location.href = "/logout")}
+            >
+              Logout
+            </Button>
+            {/* Icon-only on mobile */}
+            <Button
+              variant="outline"
+              className="h-8 sm:hidden p-2 flex items-center justify-center"
+              onClick={() => (window.location.href = "/logout")}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          {/* dark mode */}
-          <Button
-            variant="outline"
-            className="h-8"
-            onClick={() => {
-              // toggle dark mode
-              document.body.classList.toggle("dark");
-            }}
-          >
-            Toggle Mode
-          </Button>
-          {/* logout */}
-          <Button
-            variant="outline"
-            className="h-8"
-            onClick={() => {
-              window.location.href = "/logout";
-            }}
-          >
-            Logout
-          </Button>
-        </div>
-      </div>
-      <hr />
-      {/* toggle */}
-      <Outlet />
-    </>
-  ),
+
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden px-4 pb-2">
+            <NavigationMenu>
+              <NavigationMenuList className="flex flex-col gap-2">
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                      Transactions
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link
+                      to="/expenses"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Expenses
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link to="/budget" onClick={() => setMobileMenuOpen(false)}>
+                      Budget
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    asChild
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    <Link
+                      to="/history"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      History
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        )}
+
+        <hr />
+        <Outlet />
+      </>
+    );
+  },
 });
 
 const indexRoute = createRoute({
@@ -121,7 +217,7 @@ const indexRoute = createRoute({
 
 const chartsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/charts",
+  path: "/expenses",
   component: function Charts() {
     return (
       <div className="p-2 overflow-y-auto">
@@ -145,7 +241,7 @@ const budgetRoute = createRoute({
 
 const analysisRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/analysis",
+  path: "/history",
   component: function Analysis() {
     return (
       <div className="p-2 overflow-y-auto">

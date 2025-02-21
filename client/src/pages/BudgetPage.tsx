@@ -65,14 +65,18 @@ const BudgetPage = () => {
 
   return (
     <div className="container mx-auto pl-4 mt-4">
-      <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold">Budget</h1>
-        {/* Month selection dropdown */}
-        <MonthSelect
-          selectedMonth={selectedMonth}
-          onMonthSelect={handleMonthSelect}
-          dates={dates}
-        />
+      <div className="flex items-center gap-4 flex-col md:flex-row">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Budget</h1>
+          {/* Month selection dropdown */}
+          <MonthSelect
+            selectedMonth={selectedMonth}
+            onMonthSelect={handleMonthSelect}
+            dates={dates}
+          />
+        </div>
+        {/* Display loading state */}
+        {isLoading && <div className="text-gray-500">Loading...</div>}
         {/* Display total income vs. expenses */}
         <div className="flex gap-4">
           <div>

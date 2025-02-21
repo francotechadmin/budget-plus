@@ -57,22 +57,23 @@ export function DataTablePagination<TData>({
   const pages = getVisiblePageNumbers();
 
   return (
-    <div className="flex items-center justify-between px-2">
-      {/* <div className="flex-1 text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div> */}
-      {/* total rows */}
-      <div>
+    <div className="flex flex-col sm:flex-row items-center justify-between px-2">
+      {/* Total rows & amount */}
+      <div className="mb-2 sm:mb-0">
         <p className="text-sm text-muted-foreground">
           {table.getRowModel().rows.length} rows - Total amount: $
           {table
             .getRowModel()
-            .rows.reduce((acc, row) => acc + row.getValue("amount"), 0)
+            .rows.reduce(
+              (acc, row) => acc + (row.getValue("amount") as number),
+              0
+            )
             .toFixed(2)}
         </p>
       </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+
+      {/* Desktop Pagination Controls */}
+      <div className="hidden lg:flex items-center space-x-6">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
@@ -127,7 +128,7 @@ export function DataTablePagination<TData>({
               </span>
             ) : (
               <Button
-                key={page} // Use a unique key for each button
+                key={page}
                 variant={currentPage === page ? "secondary" : "outline"}
                 className="h-8 w-8 p-0"
                 onClick={() => table.setPageIndex(page)}
@@ -156,6 +157,31 @@ export function DataTablePagination<TData>({
             <DoubleArrowRightIcon className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      {/* Mobile Pagination Controls */}
+      <div className="flex lg:hidden items-center space-x-2">
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <span className="sr-only">Go to previous page</span>
+          <ChevronLeftIcon className="h-4 w-4" />
+        </Button>
+        <div className="text-sm font-medium">
+          Page {currentPage + 1} of {totalPages}
+        </div>
+        <Button
+          variant="outline"
+          className="h-8 w-8 p-0"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          <span className="sr-only">Go to next page</span>
+          <ChevronRightIcon className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
