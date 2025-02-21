@@ -1,8 +1,11 @@
+# elasticsearch_simple_client/search_query_builder.py
+
 import json
 
 class SearchQueryBuilder:
     """
-    Query builder to search for single index in elasticsearch with multiple musts or shoulds
+    Query builder for searching a single index in Elasticsearch.
+    Supports must, should and filter clauses.
     """
 
     @staticmethod
@@ -17,25 +20,23 @@ class SearchQueryBuilder:
             }
         }
 
-    def build_single_index_search_query(self,
-                                        field: str,
-                                        query_return_length: int,
-                                        musts: list = None,
-                                        shoulds: list = None
-                                        ):
-        if musts is None:
-            musts = []
-        if shoulds is None:
-            shoulds = []
-
-        query: dict = {
+    def build_search_query(self,
+                           field: str,
+                           musts: list = None,
+                           shoulds: list = None,
+                           filters: list = None,
+                           query_return_length: int = 10):
+        musts = musts or []
+        shoulds = shoulds or []
+        filters = filters or []
+        query = {
             "size": query_return_length,
             "query": {
                 "bool": {
-                    "must": [self._match(field, must) for must in musts],
-                    "should": [self._match(field, should) for should in shoulds],
+                    "must": [self._match(field, m) for m in musts],
+                    "should": [self._match(field, s) for s in shoulds],
+                    "filter": filters
                 }
             }
         }
-
         return json.dumps(query)
