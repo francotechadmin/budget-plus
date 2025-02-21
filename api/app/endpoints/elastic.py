@@ -62,11 +62,9 @@ def get_categories(description_request: DescriptionRequest):
     logger.debug(f"Elasticsearch result: {es_result}") #2025-02-20 19:56:11 DEBUG:app.endpoints.elastic:Elasticsearch result: [{'_index': 'transactions', '_id': 'UUwqJpUBA6mwUY9GZgPq', '_score': 6.006294, '_source': {'user_id': 'default', 'description': 'BURGER JOINT', 'category': 'Fast Food', 'default': True}}]
     
     # Extract annotated_category or default to "Unknown"
-    category = (
-        es_result[0]["_source"].get("category") 
-        if es_result and es_result[0]["_source"].get("category")
-        else "Unknown"
-    )
+    category = es_result[0]["_source"].get("annotated_category") if es_result else "Unknown"
+
+    
     logger.info(f"Category found: {category}")
     return {"category": category}
 

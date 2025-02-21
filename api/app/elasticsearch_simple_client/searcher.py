@@ -41,8 +41,8 @@ class Searcher:
             filters.append({
                 "bool": {
                     "should": [
-                        {"term": {"user_id": user_id}},
-                        {"term": {"default": True}}
+                        {"match": {"user_id": user_id}},
+                        {"match": {"default": True}}
                     ]
                 }
             })

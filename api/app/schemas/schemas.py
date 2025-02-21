@@ -32,3 +32,4 @@ class DescriptionRequest(BaseModel):
 class UpdateTransactionRequest(BaseModel):
     transaction_id: int
     category: str
+    index_es: Optional[str] = None

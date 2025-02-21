@@ -531,9 +531,13 @@ def get_transactions_range(
     return months
 
 @router.post("/update", summary="Update a transaction's category")
-def update_transaction(update_request: UpdateTransactionRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def update_transaction(
+    update_request: UpdateTransactionRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     """
-    Update the category of a transaction.
+    Update the category of a transaction and, if requested, index the updated transaction in Elasticsearch.
     """
     logger.info(f"User {current_user['sub']} requested update for transaction {update_request.transaction_id}.")
     txn = db.query(Transaction).filter(
@@ -544,7 +548,7 @@ def update_transaction(update_request: UpdateTransactionRequest, db: Session = D
         logger.warning(f"Transaction {update_request.transaction_id} not found for user {current_user['sub']}.")
         raise HTTPException(status_code=404, detail="Transaction not found.")
     
-    # Look up the new category by name
+    # Look up the new category by name.
     new_category = db.query(Category).filter(Category.name == update_request.category).first()
     if not new_category:
         logger.warning(f"Category {update_request.category} not found for update request.")
@@ -558,17 +562,22 @@ def update_transaction(update_request: UpdateTransactionRequest, db: Session = D
         logger.error(f"Error updating transaction: {e}")
         raise HTTPException(status_code=500, detail="Error updating transaction.")
     
-    # Update Elasticsearch as well, if needed
-    try:
-        uploader = Uploader()
-        uploader.post_df(pd.DataFrame([{
-            'description': txn.description,
-            'annotated_category': update_request.category
-        }]))
-        logger.debug("Elasticsearch updated for transaction change.")
-    except Exception as e:
-        logger.error(f"Error updating Elasticsearch: {e}")
-        raise HTTPException(status_code=500, detail="Error updating Elasticsearch.")
+    # Optionally update Elasticsearch if the flag is set.
+    if getattr(update_request, "index_es", True):
+        try:
+            uploader = Uploader()
+            # When indexing, include additional fields if needed (like user_id and default flag).
+            df = pd.DataFrame([{
+                'description': txn.description,
+                'annotated_category': update_request.category,
+                'user_id': current_user["sub"],
+                'default': False
+            }])
+            uploader.post_df(df)
+            logger.debug("Elasticsearch updated for transaction change.")
+        except Exception as e:
+            logger.error(f"Error updating Elasticsearch: {e}")
+            raise HTTPException(status_code=500, detail="Error updating Elasticsearch.")
     
     # Return updated transaction 
     updated_txn = db.query(Transaction).filter(
@@ -578,6 +587,7 @@ def update_transaction(update_request: UpdateTransactionRequest, db: Session = D
     if not updated_txn:
         logger.warning(f"Transaction {update_request.transaction_id} not found after update.")
         raise HTTPException(status_code=404, detail="Transaction not found.")
+    
     response = {
         "id": updated_txn.id,
         "description": updated_txn.description,
