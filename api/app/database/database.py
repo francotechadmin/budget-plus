@@ -4,7 +4,15 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from google.cloud.sql.connector import Connector
+import google.auth
+import logging
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Initialize Cloud SQL Python Connector
+# Set environment variables
 ENV = os.getenv("ENV", "development")
 CLOUD_SQL_CONNECTION_NAME = os.getenv("CLOUD_SQL_CONNECTION_NAME", "your-cloud-sql-connection-name")
 PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
@@ -30,6 +38,10 @@ def init_connection_pool(connector: Connector) -> Engine:
             return conn
     else:
         # Python Connector database connection function
+        credential, project = google.auth.default()
+        IAM_USER = credential.service_account_email
+        logger.debug(f"Using IAM user: {IAM_USER}")
+
         def getconn():
             conn = connector.connect(
                 CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name

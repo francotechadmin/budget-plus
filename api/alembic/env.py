@@ -5,11 +5,12 @@ from google.cloud.sql.connector import Connector
 from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine
 from app.main import Base # Import your Base model
+import google.auth
 
 # Logging configuration
 import logging
-logger = logging.getLogger("alembic.env")
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,7 +30,6 @@ PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASSWORD = os.getenv("PG_PASSWORD", "mysecretpassword")
 PG_PORT = os.getenv("PG_PORT", "5433")
-IAM_USER = os.getenv("IAM_USER", "default")
 
 config.set_main_option(
     "sqlalchemy.url",
@@ -58,6 +58,9 @@ def init_connection_pool(connector: Connector) -> Engine:
     else:
         logger.debug("Running in production mode")
         # Python Connector database connection function
+        credential, project = google.auth.default()
+        IAM_USER = credential.service_account_email
+        logger.debug(f"Using IAM user: {IAM_USER}")
         def getconn():
             conn = connector.connect(
                 CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
