@@ -11,6 +11,7 @@ PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASSWORD = os.getenv("PG_PASSWORD", "mysecretpassword")
 PG_PORT = os.getenv("PG_PORT", "5432")
+IAM_USER = os.getenv("IAM_USER", "default")
 
 # helper function to return SQLAlchemy connection pool
 def init_connection_pool(connector: Connector) -> Engine:
@@ -33,7 +34,7 @@ def init_connection_pool(connector: Connector) -> Engine:
             conn = connector.connect(
                 CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
                 "pg8000",
-                user=PG_USER,
+                iam_user=IAM_USER,
                 db=PG_DBNAME,
                 enable_iam_auth=True
             )
