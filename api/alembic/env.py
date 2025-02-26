@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Initialize Cloud SQL Python Connector
+ENV = os.getenv("ENV", "development")
 CLOUD_SQL_CONNECTION_NAME = os.getenv("CLOUD_SQL_CONNECTION_NAME", "your-cloud-sql-connection-name")
 PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
 PG_USER = os.getenv("PG_USER", "postgres")
@@ -31,17 +32,30 @@ config.set_main_option(
 
 # helper function to return SQLAlchemy connection pool
 def init_connection_pool(connector: Connector) -> Engine:
-    # Python Connector database connection function
-    def getconn():
-        conn = connector.connect(
-            CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
-            "pg8000",
-            user=PG_USER,
-            password=PG_PASSWORD,
-            db=PG_DBNAME,
-            ip_type="public"  # "private" for private IP
-        )
-        return conn
+
+    if ENV == "development":
+        # Python Connector database connection function
+        def getconn():
+            conn = connector.connect(
+                CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
+                "pg8000",
+                user=PG_USER,
+                password=PG_PASSWORD,
+                db=PG_DBNAME,
+                ip_type="public"  # "private" for private IP
+            )
+            return conn
+    else:
+        # Python Connector database connection function
+        def getconn():
+            conn = connector.connect(
+                CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
+                "pg8000",
+                user=PG_USER,
+                db=PG_DBNAME,
+                iam_auth=True,
+            )
+            return conn
 
     SQLALCHEMY_DATABASE_URL = "postgresql+pg8000://"
 
