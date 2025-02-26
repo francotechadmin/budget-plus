@@ -2,6 +2,7 @@
 import calendar
 import logging
 import io
+import datetime
 import pandas as pd
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
@@ -235,7 +236,7 @@ def get_transactions_by_month(
         )
         logger.debug(f"Found {len(rows)} transactions for {year}-{month:02d} for user {current_user['sub']}.")
     except Exception as e:
-        logger.error(f"Error retrieving transactions: {e}")
+        logger.error(f"Error retrieving transactions for {year}-{month:02d}: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transactions for the specified month.")
 
     # Build nested grouping: { section: { category: [transactions...] } }
@@ -274,9 +275,11 @@ def get_transactions_expenses(
     Excludes transactions in the 'Income' section or 'Transfer' category.
     """
     logger.info(f"Calculating expense totals for user {current_user['sub']} for {year}-{month:02d}.")
-    start_date = f"{year}-{month:02d}-01"
+
+    # Create date objects for start and end of the month.
+    start_date = datetime.date(year, month, 1)
     last_day = calendar.monthrange(year, month)[1]
-    end_date = f"{year}-{month:02d}-{last_day}"
+    end_date = datetime.date(year, month, last_day)
 
     try:
         results = (
@@ -287,7 +290,8 @@ def get_transactions_expenses(
             .join(Category, Transaction.category_id == Category.id)
             .join(Section, Category.section_id == Section.id)
             .filter(
-                Transaction.date.between(start_date, end_date),
+                Transaction.date >= start_date,
+                Transaction.date <= end_date,
                 Transaction.user_id == current_user["sub"],
                 Section.name != 'Income',
                 Category.name != 'Transfer'
@@ -304,6 +308,7 @@ def get_transactions_expenses(
     logger.info(f"Returning expense totals for {year}-{month:02d}.")
     return totals
 
+
 @router.get("/totals/{year}/{month}", summary="Get income and expenses totals for a month")
 def get_transactions_totals(
     year: int,
@@ -318,9 +323,10 @@ def get_transactions_totals(
     """
     logger.info(f"Calculating totals for user {current_user['sub']} for {year}-{month:02d}.")
     
-    start_date = f"{year}-{month:02d}-01"
+    # Create proper date objects for comparison
+    start_date = datetime.date(year, month, 1)
     last_day = calendar.monthrange(year, month)[1]
-    end_date = f"{year}-{month:02d}-{last_day}"
+    end_date = datetime.date(year, month, last_day)
     
     try:
         totals = db.query(
@@ -341,15 +347,22 @@ def get_transactions_totals(
         ).filter(
             Transaction.date.between(start_date, end_date),
             Transaction.user_id == current_user["sub"]
-        ).one()
+        ).one_or_none()
         
-        income_total = totals.income or 0
-        expenses_total = totals.expenses or 0
+        # If there are no transactions, totals will be None.
+        if totals is None:
+            income_total = 0
+            expenses_total = 0
+        else:
+            income_total = totals.income or 0
+            expenses_total = totals.expenses or 0
+        
         logger.info(f"Income: {income_total}, Expenses: {expenses_total} for {year}-{month:02d}.")
         return {"income": income_total, "expenses": expenses_total}
     except Exception as e:
         logger.error(f"Error retrieving totals: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving totals.")
+
 
 @router.get("/grouped/{year}/{month}", summary="Get grouped transactions for a specific month")
 def get_grouped_transactions(
@@ -361,47 +374,14 @@ def get_grouped_transactions(
     """
     Retrieves transactions for the given month, grouped by section and category.
     Each group includes a computed total for that category and section.
-    
-    Response example:
-    [
-      {
-        "section": "Entertainment",
-        "total": -18.38,
-        "categories": [
-          {
-            "name": "Subscriptions",
-            "total": -18.38,
-            "transactions": [
-              {
-                "id": 4082,
-                "description": "APPLE.COM/BILL ...",
-                "date": "2025-02-03T00:00:00",
-                "amount": -18.38
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "section": "Housing",
-        "total": -1500.00,
-        "categories": [
-          {
-            "name": "Rent",
-            "total": -1500.00,
-            "transactions": [
-              { "id": 4085, "description": "Rent payment", "date": "2025-02-03T00:00:00", "amount": -1500.0 }
-            ]
-          }
-        ]
-      }
-    ]
     """
     logger.info(f"User {current_user['sub']} requested grouped transactions for {year}-{month:02d}.")
+
     try:
-        start_date = f"{year}-{month:02d}-01"
+        # Convert to proper date objects
+        start_date = datetime.date(year, month, 1)
         last_day = calendar.monthrange(year, month)[1]
-        end_date = f"{year}-{month:02d}-{last_day}"
+        end_date = datetime.date(year, month, last_day)
         
         # Retrieve all transactions for the period, joined with category and section names.
         rows = (
@@ -420,19 +400,16 @@ def get_grouped_transactions(
             .all()
         )
     except Exception as e:
-        logger.error(f"Error retrieving transactions: {e}")
-        raise HTTPException(status_code=500, detail="Error retrieving transactions.")
+        logger.error(f"Error retrieving transactions grouped by month: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving grouped transactions for the specified month.")
     
     # Group transactions into a nested structure:
     grouped = {}
     for txn, cat_name, sec_name in rows:
-        # Initialize section group if needed.
         if sec_name not in grouped:
             grouped[sec_name] = {}
-        # Initialize category group within this section if needed.
         if cat_name not in grouped[sec_name]:
             grouped[sec_name][cat_name] = []
-        # Append transaction data.
         grouped[sec_name][cat_name].append({
             "id": txn.id,
             "description": txn.description,
@@ -442,7 +419,7 @@ def get_grouped_transactions(
             "section": sec_name
         })
     
-    # Build final response with totals computed.
+    # Build final response with computed totals.
     final_result = []
     for sec_name, categories_data in grouped.items():
         section_total = 0
@@ -461,7 +438,7 @@ def get_grouped_transactions(
             "categories": category_list
         })
     
-    # Optionally, sort final_result (e.g. alphabetically by section)
+    # Optionally sort final_result by section name.
     final_result.sort(key=lambda x: x["section"])
     logger.info(f"Returning grouped transactions for {year}-{month:02d}.")
     return final_result
@@ -514,15 +491,19 @@ def get_transactions_range(
 ):
     """
     Returns a list of months (YYYY-MM) for which there are transactions for the current user.
+    Uses a subquery to avoid PostgreSQL's DISTINCT/ORDER BY error.
     """
     logger.info(f"Retrieving transaction month range for user {current_user['sub']}.")
     try:
-        results = (
-            db.query(func.distinct(func.to_char(Transaction.date, 'YYYY-MM')))
+        # Create a subquery that selects distinct months.
+        subq = (
+            db.query(func.to_char(Transaction.date, 'YYYY-MM').label("month"))
             .filter(Transaction.user_id == current_user["sub"])
-            .order_by(func.to_char(Transaction.date, 'YYYY-MM').desc())
-            .all()
+            .distinct()
+            .subquery()
         )
+        # Order the distinct months from the subquery.
+        results = db.query(subq.c.month).order_by(subq.c.month.desc()).all()
         months = [row[0] for row in results]
         logger.debug(f"Found transaction months: {months}")
     except Exception as e:
@@ -637,41 +618,35 @@ async def import_bank_transactions(
       - amount
       - category
 
-    Before processing, this endpoint pings Elasticsearch. If available,
-    it uses Elasticsearch to automatically determine the category based on the transaction description.
-    If ES is unavailable or does not return a category, it falls back to the provided category.
-    If that category is not found, the transaction is categorized as "Unknown".
+    Elasticsearch is only used if no valid category is provided in the file.
+    If ES is available but the file provides a valid category, that value is used.
+    If the provided category is not found in the DB, the transaction is categorized as "Unknown".
     """
     logger.info(f"User {current_user['sub']} is importing transactions from file: {file.filename}")
     new_transactions = []
     required_columns = {"date", "description", "amount", "category"}
     
-    # Determine file type by extension
+    # Determine file type by extension and read file into DataFrame.
     file_ext = file.filename.lower()
-    if file_ext.endswith(".csv"):
-        try:
-            contents = await file.read()
+    try:
+        contents = await file.read()
+        if file_ext.endswith(".csv"):
             logger.debug("Reading CSV file content.")
             df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
-        except Exception as e:
-            logger.error(f"Error reading CSV file {file.filename}: {e}")
-            raise HTTPException(status_code=400, detail=f"Error reading CSV file: {str(e)}")
-    elif file_ext.endswith((".xlsx", ".xls")):
-        try:
-            contents = await file.read()
+        elif file_ext.endswith((".xlsx", ".xls")):
             logger.debug("Reading Excel file content.")
             df = pd.read_excel(io.BytesIO(contents))
-        except Exception as e:
-            logger.error(f"Error reading Excel file {file.filename}: {e}")
-            raise HTTPException(status_code=400, detail=f"Error reading Excel file: {str(e)}")
-    else:
-        logger.warning(f"Unsupported file format for file: {file.filename}")
-        raise HTTPException(
-            status_code=400,
-            detail="Unsupported file format. Please upload a CSV or Excel file."
-        )
+        else:
+            logger.warning(f"Unsupported file format for file: {file.filename}")
+            raise HTTPException(
+                status_code=400,
+                detail="Unsupported file format. Please upload a CSV or Excel file."
+            )
+    except Exception as e:
+        logger.error(f"Error reading file {file.filename}: {e}")
+        raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
     
-    # Verify that the DataFrame contains all required columns
+    # Verify that the DataFrame contains all required columns.
     if not required_columns.issubset(set(df.columns)):
         missing = required_columns - set(df.columns)
         logger.warning(f"File {file.filename} is missing required columns: {', '.join(missing)}")
@@ -680,63 +655,75 @@ async def import_bank_transactions(
             detail=f"Missing required columns: {', '.join(missing)}"
         )
     logger.debug(f"File {file.filename} contains all required columns.")
+
+    # Pre-fetch categories for the current user.
+    categories_db = db.query(Category).filter(Category.user_id == current_user["sub"]).all()
+    # Build a lookup dictionary using lower-case keys.
+    categories_dict = {cat.name.lower(): cat for cat in categories_db}
     
-    # Instantiate the Elasticsearch searcher and check availability.
+    # Pre-fetch existing transactions in the file's date range to avoid duplicate checks per row.
+    try:
+        # Convert file date column to datetime if not already.
+        df['date'] = pd.to_datetime(df['date']).dt.date
+    except Exception as e:
+        logger.error(f"Error converting date column: {e}")
+        raise HTTPException(status_code=400, detail="Invalid date format in file.")
+
+    min_date = df['date'].min()
+    max_date = df['date'].max()
+    existing_txns = db.query(Transaction).filter(
+        Transaction.user_id == current_user["sub"],
+        Transaction.date.between(min_date, max_date)
+    ).all()
+    # Build a set of keys for quick duplicate lookup.
+    existing_keys = set((txn.description, txn.date, txn.amount, txn.category_id) for txn in existing_txns)
+
+    # Instantiate the Elasticsearch searcher.
     searcher = Searcher()
     try:
         es_available = searcher.ping()
         logger.info("Elasticsearch is available.")
     except Exception as e:
         es_available = False
-        logger.error(f"Elasticsearch ping failed: {e}. Falling back to file-provided categories.")
+        logger.error(f"Elasticsearch ping failed: {e}")
 
-    # Process each row of the DataFrame
+    # Process each row of the DataFrame.
     for idx, row in df.iterrows():
-        # check for required fields
+        # Skip rows with missing required fields.
         if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']):
             logger.warning(f"Row {idx} is missing required fields. Skipping.")
             continue
 
         logger.debug(f"Processing row {idx} of file {file.filename}.")
-
-        # Attempt to get an automatic category using Elasticsearch if available.
-        annotated_category = None
-        if es_available:
-            try:
-                es_result = searcher.execute_search(
-                    field="description",
-                    shoulds=[row['description']]
-                )
-                hits = es_result.get("hits", {}).get("hits", [])
-                if hits:
-                    annotated_category = hits[0]["_source"].get("annotated_category")
-                    logger.debug(f"Row {idx}: ES annotated category: {annotated_category}")
-            except Exception as e:
-                logger.error(f"Error during Elasticsearch search for row {idx}: {e}")
-                annotated_category = None
-
-        # Use the annotated category if available; otherwise fall back to the file's category.
-        if annotated_category:
-            final_category = annotated_category
-        elif pd.notna(row['category']):
-            final_category = row['category']
+        
+        # Determine the final category.
+        file_category = str(row['category']).strip() if pd.notna(row['category']) else ""
+        if file_category:
+            final_category = file_category
+            logger.debug(f"Row {idx}: Using provided category: {final_category}")
         else:
-            logger.warning(f"Row {idx}: No category found. Using 'Unknown'.")
-            final_category = "Unknown"
-
-        # Look up the Category in our database for the current user.
-        cat_entry = (
-            db.query(Category)
-            .filter(Category.name == final_category, Category.user_id == current_user["sub"])
-            .first()
-        )
+            # If no valid category is provided, try Elasticsearch if available.
+            annotated_category = None
+            if es_available:
+                try:
+                    es_result = searcher.execute_search(
+                        field="description",
+                        shoulds=[row['description']]
+                    )
+                    hits = es_result.get("hits", {}).get("hits", [])
+                    if hits:
+                        annotated_category = hits[0]["_source"].get("annotated_category")
+                        logger.debug(f"Row {idx}: ES annotated category: {annotated_category}")
+                except Exception as e:
+                    logger.error(f"Error during Elasticsearch search for row {idx}: {e}")
+            final_category = annotated_category if annotated_category else "Unknown"
+            logger.debug(f"Row {idx}: Final category from ES fallback: {final_category}")
+        
+        # Look up the category in our pre-fetched dictionary.
+        cat_entry = categories_dict.get(final_category.lower())
         if not cat_entry:
             logger.warning(f"Category '{final_category}' not found for row {idx}. Using 'Unknown'.")
-            cat_entry = (
-                db.query(Category)
-                .filter(Category.name == "Unknown", Category.user_id == current_user["sub"])
-                .first()
-            )
+            cat_entry = categories_dict.get("unknown")
             if not cat_entry:
                 logger.info("Creating default 'Unknown' category.")
                 cat_entry = Category(
@@ -748,23 +735,18 @@ async def import_bank_transactions(
                 db.add(cat_entry)
                 db.commit()
                 db.refresh(cat_entry)
+                # Add to our dictionary for subsequent lookups.
+                categories_dict["unknown"] = cat_entry
         
-        # Check for duplicate transactions.
-        existing_txn = (
-            db.query(Transaction)
-            .filter(
-                Transaction.description == row['description'],
-                Transaction.date == row['date'],
-                Transaction.amount == row['amount'],
-                Transaction.category_id == cat_entry.id,
-                Transaction.user_id == current_user["sub"]
-            )
-            .first()
-        )
-        if existing_txn:
+        # Build a duplicate key for this transaction.
+        txn_key = (row['description'], row['date'], row['amount'], cat_entry.id)
+        if txn_key in existing_keys:
             logger.debug(f"Duplicate transaction found for row {idx}. Skipping.")
             continue
-        
+
+        # Add the new key so that subsequent rows in the file are compared.
+        existing_keys.add(txn_key)
+
         # Create a new Transaction record.
         new_txn = Transaction(
             user_id=current_user["sub"],
@@ -775,7 +757,8 @@ async def import_bank_transactions(
         )
         new_transactions.append(new_txn)
         logger.debug(f"Row {idx} processed: Transaction added.")
-    
+
+    # Bulk insert new transactions.
     if new_transactions:
         try:
             db.bulk_save_objects(new_transactions)
