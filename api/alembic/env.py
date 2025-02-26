@@ -6,6 +6,11 @@ from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine
 from app.main import Base # Import your Base model
 
+# Logging configuration
+import logging
+logger = logging.getLogger("alembic.env")
+logger.setLevel(logging.DEBUG)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -32,8 +37,9 @@ config.set_main_option(
 
 # helper function to return SQLAlchemy connection pool
 def init_connection_pool(connector: Connector) -> Engine:
-
+    logger.debug("Initializing connection pool")
     if ENV == "development":
+        logger.debug("Running in development mode")
         # Python Connector database connection function
         def getconn():
             conn = connector.connect(
@@ -44,8 +50,12 @@ def init_connection_pool(connector: Connector) -> Engine:
                 db=PG_DBNAME,
                 ip_type="public"  # "private" for private IP
             )
+            if conn is None:
+                logger.error("Failed to establish connection")
+                raise Exception("Failed to establish connection")
             return conn
     else:
+        logger.debug("Running in production mode")
         # Python Connector database connection function
         def getconn():
             conn = connector.connect(
@@ -55,13 +65,19 @@ def init_connection_pool(connector: Connector) -> Engine:
                 db=PG_DBNAME,
                 enable_iam_auth=True,
             )
+            if conn is None:
+                logger.error("Failed to establish connection")
+                raise Exception("Failed to establish connection")
             return conn
 
     SQLALCHEMY_DATABASE_URL = "postgresql+pg8000://"
 
+    logger.debug(f"Creating SQLAlchemy engine with URL: {SQLALCHEMY_DATABASE_URL}")
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL , creator=getconn
     )
+
+    logger.debug("SQLAlchemy engine created successfully")
     return engine
 
 def run_migrations_offline():
@@ -80,6 +96,7 @@ def run_migrations_offline():
 
 def run_migrations_online():
     """Run migrations in 'online' mode."""
+    logger.info("Running migrations online")
     connector = Connector()
     connectable = init_connection_pool(connector)
 
