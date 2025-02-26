@@ -31,7 +31,7 @@ def create_user(db: Session, user: UserCreate):
     db.commit()
     db.refresh(db_user)
     created_sections = create_default_sections(db, user.id, default_sections)
-    create_default_categories(db, user.id, default_sections, created_sections)
+    create_default_categories(db, user.id, created_sections)
     return db_user
 
 def create_default_sections(db: Session, user_id: str, default_sections: list) -> list:
