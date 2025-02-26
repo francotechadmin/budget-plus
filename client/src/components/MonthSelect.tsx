@@ -18,6 +18,10 @@ export function MonthSelect({
   onMonthSelect,
   dates,
 }: MonthSelectProps) {
+  if (!dates || dates.length === 0) {
+    return <div>No data available. Add Transactions to see data.</div>;
+  }
+
   return (
     <Select onValueChange={onMonthSelect} defaultValue={selectedMonth}>
       <SelectTrigger className="w-[180px]">
