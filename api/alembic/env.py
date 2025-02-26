@@ -63,7 +63,7 @@ def init_connection_pool(connector: Connector) -> Engine:
             conn = connector.connect(
                 CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
                 "pg8000",
-                iam_user=IAM_USER,
+                user=IAM_USER,
                 db=PG_DBNAME,
                 enable_iam_auth=True,
             )
