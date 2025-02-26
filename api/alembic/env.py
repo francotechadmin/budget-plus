@@ -53,7 +53,7 @@ def init_connection_pool(connector: Connector) -> Engine:
                 "pg8000",
                 user=PG_USER,
                 db=PG_DBNAME,
-                iam_auth=True,
+                enable_iam_auth=True,
             )
             return conn
 
