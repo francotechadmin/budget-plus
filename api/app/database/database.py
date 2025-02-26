@@ -38,10 +38,6 @@ def init_connection_pool(connector: Connector) -> Engine:
             return conn
     else:
         # Python Connector database connection function
-        credential, project = google.auth.default()
-        IAM_USER = credential.service_account_email
-        logger.debug(f"Using IAM user: {IAM_USER}")
-
         def getconn():
             conn = connector.connect(
                 CLOUD_SQL_CONNECTION_NAME, # Cloud SQL Instance Connection Name
