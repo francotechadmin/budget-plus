@@ -6,9 +6,6 @@ from .database.database import engine, Base
 from .models.models import Base
 from .endpoints import ping, categories, transactions, elastic, users
 
-# Create all database tables (if not already present)
-# Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Production-Ready API")
 
 app.add_middleware(
