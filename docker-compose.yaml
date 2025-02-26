@@ -18,11 +18,12 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - CLOUD_SQL_CONNECTION_NAME=your-project-id:your-region:your-instance
       - PG_DBNAME=postgres
-      - PG_HOST=db
       - PG_USER=postgres
-      - PG_PASSWORD=mysecretpassword
+      - PG_PASSWORD=supersecretpassword
       - PG_PORT=5432
+      - GOOGLE_APPLICATION_CREDENTIALS=app/credentials.json
     volumes:
       - ./api:/app
     networks:

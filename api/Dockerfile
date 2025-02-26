@@ -37,4 +37,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # Command to run the application using Gunicorn with Uvicorn workers
 # Adjust the number of workers as necessary for your environment
-CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--reload"]
+CMD ["gunicorn", "app.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--reload", "--timeout", "120"]
