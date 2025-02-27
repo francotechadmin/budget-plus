@@ -1,0 +1,8 @@
+.venv
+api/__pycache__
+api/elasticsearch_simple_client/__pycache__
+client/node_modules
+api/db
+api/alembic/versions/
+api/credentials.json
+api/app/credentials.json
