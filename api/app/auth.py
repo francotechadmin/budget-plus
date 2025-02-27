@@ -9,7 +9,7 @@ from jose.exceptions import JWTError
 import urllib3
 
 AUTH0_DOMAIN = "dev-gqc2uqr58a2eqikr.us.auth0.com"  # e.g., "your-tenant.auth0.com"
-API_AUDIENCE = "http://localhost:8000"   # e.g., "https://your-api/"
+API_AUDIENCE = "https://budget-plus-497304063134.us-central1.run.app"  # e.g., "https://your-api-identifier"
 ALGORITHMS = ["RS256"]
 
 # Dependency for extracting the token from the Authorization header
