@@ -7,7 +7,7 @@ import {
 import { Transaction } from "@/models/transactions";
 
 const fetchTransactions = async (): Promise<Transaction[]> => {
-  const response = await axios.get("/transactions");
+  const response = await axios.get("/transactions/");
   return response.data;
 };
 

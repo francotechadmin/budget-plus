@@ -7,7 +7,7 @@ import {
 import { Sections } from "@/models/sections";
 
 const fetchCategories = async (): Promise<Sections> => {
-  const response = await axios.get("/categories");
+  const response = await axios.get("/categories/");
   return response.data;
 };
 
