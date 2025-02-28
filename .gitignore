@@ -6,3 +6,7 @@ api/db
 api/alembic/versions/
 api/credentials.json
 api/app/credentials.json
+client/tsconfig.node.tsbuildinfo
+client/tsconfig.app.tsbuildinfo
+api/override.env
+client/override.env
