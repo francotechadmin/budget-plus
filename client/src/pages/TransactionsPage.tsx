@@ -27,7 +27,8 @@ export default function TransactionsPage() {
     isError: catError,
   } = useFetchCategories();
 
-  const importTransactionsMutation = useImportTransactionsMutation();
+  const { mutate: importTransactionsMutation, isPending: isImporting } =
+    useImportTransactionsMutation();
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
 
@@ -49,7 +50,13 @@ export default function TransactionsPage() {
       if (!event.files) {
         return;
       }
-      importTransactionsMutation.mutate(event.files[0]);
+      const file = event.files[0];
+      if (!file) {
+        return;
+      }
+      // Call the importTransactionsMutation with the selected file
+      importTransactionsMutation(file);
+      event.value = ""; // Clear the input value after file selection
     };
     input.click();
   };
@@ -63,7 +70,16 @@ export default function TransactionsPage() {
   return (
     <div className="container mx-auto pl-4 mt-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-left">Transactions</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold text-left">Transactions</h1>
+          {/* loading text */}
+          {transactionsLoading && (
+            <span className="text-sm text-gray-500 ml-2">Loading...</span>
+          )}
+          {isImporting && (
+            <span className="text-sm text-gray-500 ml-2">Importing...</span>
+          )}
+        </div>
         <Button
           variant="outline"
           className="h-8"
