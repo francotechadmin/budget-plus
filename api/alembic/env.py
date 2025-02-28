@@ -1,6 +1,8 @@
 import os
 from logging.config import fileConfig
 from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import engine_from_config
 from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine
 from app.main import Base # Import your Base model
@@ -55,11 +57,29 @@ def run_migrations_online():
     logger.info("Running migrations online")
     connectable = create_engine(config.get_main_option("sqlalchemy.url"))
 
+    def process_revision_directives(context, revision, directives):
+        if config.cmd_opts.autogenerate:
+            script = directives[0]
+            if script.upgrade_ops.is_empty():
+                directives[:] = []
+                logger.info("No changes detected in the database schema, skipping migration.")
+
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives
+        )
 
         with context.begin_transaction():
-            context.run_migrations()
+            context.run_migrations() 
+
 
 if context.is_offline_mode():
     run_migrations_offline()
