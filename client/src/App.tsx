@@ -33,6 +33,7 @@ import { Moon, LogOut, Menu, X } from "lucide-react";
 const rootRoute = createRootRoute({
   component: function RootComponent() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { logout } = useAuth0();
 
     return (
       <>
@@ -125,7 +126,9 @@ const rootRoute = createRootRoute({
             <Button
               variant="outline"
               className="h-8 hidden p-2 sm:flex items-center"
-              onClick={() => (window.location.href = "/logout")}
+              onClick={() =>
+                logout({ logoutParams: { returnTo: window.location.origin } })
+              }
             >
               Logout
             </Button>
@@ -133,7 +136,9 @@ const rootRoute = createRootRoute({
             <Button
               variant="outline"
               className="h-8 sm:hidden p-2 flex items-center justify-center"
-              onClick={() => (window.location.href = "/logout")}
+              onClick={() =>
+                logout({ logoutParams: { returnTo: window.location.origin } })
+              }
             >
               <LogOut className="h-4 w-4" />
             </Button>
