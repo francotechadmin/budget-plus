@@ -29,6 +29,7 @@ import { addAccessTokenInterceptor } from "./lib/axios.ts";
 import { useUpsertUserMutation } from "./hooks/api/useUserUpsertMutation/index.ts";
 import { useState } from "react";
 import { Moon, LogOut, Menu, X } from "lucide-react";
+const basePath = (import.meta.env.VITE_BASE_PATH as string) || "/";
 
 const rootRoute = createRootRoute({
   component: function RootComponent() {
@@ -54,7 +55,7 @@ const rootRoute = createRootRoute({
                       asChild
                       className={navigationMenuTriggerStyle()}
                     >
-                      <Link to="/">Transactions</Link>
+                      <Link to={`${basePath}/`}>Transactions</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
@@ -62,7 +63,7 @@ const rootRoute = createRootRoute({
                       asChild
                       className={navigationMenuTriggerStyle()}
                     >
-                      <Link to="/expenses">Expenses</Link>
+                      <Link to={`${basePath}/expenses`}>Expenses</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
@@ -70,7 +71,7 @@ const rootRoute = createRootRoute({
                       asChild
                       className={navigationMenuTriggerStyle()}
                     >
-                      <Link to="/budget">Budget</Link>
+                      <Link to={`${basePath}/budget`}>Budget</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
@@ -78,7 +79,7 @@ const rootRoute = createRootRoute({
                       asChild
                       className={navigationMenuTriggerStyle()}
                     >
-                      <Link to="/history">History</Link>
+                      <Link to={`${basePath}/history`}>History</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 </NavigationMenuList>
@@ -155,7 +156,10 @@ const rootRoute = createRootRoute({
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      to={`${basePath}/`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Transactions
                     </Link>
                   </NavigationMenuLink>
@@ -166,7 +170,7 @@ const rootRoute = createRootRoute({
                     className={navigationMenuTriggerStyle()}
                   >
                     <Link
-                      to="/expenses"
+                      to={`${basePath}/expenses`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Expenses
@@ -178,7 +182,10 @@ const rootRoute = createRootRoute({
                     asChild
                     className={navigationMenuTriggerStyle()}
                   >
-                    <Link to="/budget" onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      to={`${basePath}/budget`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Budget
                     </Link>
                   </NavigationMenuLink>
@@ -189,7 +196,7 @@ const rootRoute = createRootRoute({
                     className={navigationMenuTriggerStyle()}
                   >
                     <Link
-                      to="/history"
+                      to={`${basePath}/history`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       History
@@ -210,7 +217,7 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  path: `${basePath}`,
   component: function Index() {
     return (
       <div className="p-2 overflow-y-auto">
@@ -222,7 +229,7 @@ const indexRoute = createRoute({
 
 const chartsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/expenses",
+  path: `${basePath}/expenses`,
   component: function Charts() {
     return (
       <div className="p-2 overflow-y-auto">
@@ -234,7 +241,7 @@ const chartsRoute = createRoute({
 
 const budgetRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/budget",
+  path: `${basePath}/budget`,
   component: function Budget() {
     return (
       <div className="p-2 overflow-y-auto">
@@ -246,7 +253,7 @@ const budgetRoute = createRoute({
 
 const analysisRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/history",
+  path: `${basePath}/history`,
   component: function Analysis() {
     return (
       <div className="p-2 overflow-y-auto">

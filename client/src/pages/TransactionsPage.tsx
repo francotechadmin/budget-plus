@@ -36,7 +36,6 @@ export default function TransactionsPage() {
   }
 
   if (transError || catError) {
-    console.log(transactions, sections, transError, catError);
     return <div>Error fetching data.</div>;
   } // Show error message if there is an error fetching data
 
