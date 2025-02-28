@@ -9,3 +9,5 @@ client/tsconfig.node.tsbuildinfo
 client/tsconfig.app.tsbuildinfo
 api/override.env
 client/override.env
+client/.env.development
+client/.env.production

@@ -13,7 +13,7 @@ services:
     env_file:
       - path: client/.env
         required: true
-      - path: client/override.env
+      - path: client/.env.development
         required: false
 
   api:
