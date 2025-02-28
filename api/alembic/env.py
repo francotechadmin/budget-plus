@@ -22,12 +22,13 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Initialize Cloud SQL Python Connector
-ENV = os.getenv("ENV", "development")
 PG_HOST = os.getenv("PG_HOST", "localhost")
 PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASSWORD = os.getenv("PG_PASSWORD", "mysecretpassword")
 PG_PORT = os.getenv("PG_PORT", "5432")
+
+logger.debug(f"Connecting to database {PG_DBNAME} at {PG_HOST}")
 
 config.set_main_option(
     "sqlalchemy.url",

@@ -9,24 +9,15 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize Cloud SQL Python Connector
 # Set environment variables
-ENV = os.getenv("ENV", "development")
 PG_HOST = os.getenv("PG_HOST", "localhost")
 PG_DBNAME = os.getenv("PG_DBNAME", "postgres")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASSWORD = os.getenv("PG_PASSWORD", "mysecretpassword")
 PG_PORT = os.getenv("PG_PORT", "5432")
 
-# Create the database URL
-if ENV == "production":
-    # Production environment
-    DB_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
-    logger.debug(f"Using production database URL: {DB_URL}")
-else:
-    # Development environment
-    DB_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
-    logger.debug(f"Using development database URL: {DB_URL}")
+DB_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DBNAME}"
+logger.debug(f"Connecting to database {PG_DBNAME} at {PG_HOST}")
 
 # Create the SQLAlchemy engine
 try:
