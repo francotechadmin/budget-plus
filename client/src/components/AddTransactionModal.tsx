@@ -190,7 +190,7 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
               </Button>
             </DialogClose>
             <Button type="submit" disabled={isPending}>
-              {!isPending ? <Spinner size="small" /> : "Add Transaction"}
+              {isPending ? <Spinner size="small" /> : "Add Transaction"}
             </Button>
           </div>
         </form>
