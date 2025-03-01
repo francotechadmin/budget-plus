@@ -1,16 +1,8 @@
+// src/components/CategoryDropdown.tsx
 import React, { useState } from "react";
 import { useUpdateTransactionMutation } from "@/hooks/api/useUpdateTransactionMutation";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CategorySelect } from "./CategorySelect";
 
-// Define a prop type for the component
 interface CategoryDropdownProps {
   transactionId: string;
   initialCategory: string;
@@ -23,41 +15,22 @@ export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   sections,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-
   const { mutate: updateTransaction } = useUpdateTransactionMutation();
 
-  const handleCategoryChange = async (value: string) => {
-    const newCategory = value;
-    setSelectedCategory(newCategory);
-
-    // Optimistically update the category in the table
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    // Optimistically update the category for the transaction
     updateTransaction({
       id: transactionId,
-      category: newCategory,
+      category: value,
     });
   };
 
   return (
-    <Select
-      onValueChange={handleCategoryChange}
-      defaultValue={selectedCategory}
-    >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select a category" />
-      </SelectTrigger>
-      <SelectContent>
-        {/* Select grouped by section (Income, Housing, etc.) */}
-        {Object.entries(sections).map(([section, categoryItems]) => (
-          <SelectGroup key={section}>
-            <SelectLabel>{section}</SelectLabel>
-            {categoryItems.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        ))}
-      </SelectContent>
-    </Select>
+    <CategorySelect
+      value={selectedCategory}
+      onChange={handleCategoryChange}
+      sections={sections}
+    />
   );
 };
