@@ -48,7 +48,7 @@ def get_categories(description_request: DescriptionRequest):
     """
     Retrieve a suggested category for a given description from Elasticsearch.
     This endpoint uses fuzzy matching on the description and returns the 
-    annotated_category from the top hit (or "Unknown" if none is found).
+    annotated_category from the top hit (or "Uncategorized" if none is found).
     """
     description = description_request.description
     logger.info(f"Getting category for description: {description}")
@@ -61,8 +61,8 @@ def get_categories(description_request: DescriptionRequest):
     # Log the full result for debugging if needed:
     logger.debug(f"Elasticsearch result: {es_result}") 
 
-    # Extract annotated_category or default to "Unknown"
-    category = es_result[0]["_source"].get("annotated_category") if es_result else "Unknown"
+    # Extract annotated_category or default to "Uncategorized"
+    category = es_result[0]["_source"].get("annotated_category") if es_result else "Uncategorized"
 
     logger.info(f"Category found: {category}")
     return {"category": category}
@@ -94,11 +94,11 @@ def categorize_transactions(
                 shoulds=[txn.description],
                 user_id=current_user["sub"]
             ).get("hits", {}).get("hits", [])
-            new_category = es_result[0]["_source"].get("annotated_category") if es_result else "Unknown"
+            new_category = es_result[0]["_source"].get("annotated_category") if es_result else "Uncategorized"
             logger.debug(f"Transaction {txn.id}: new category = {new_category}")
         except Exception as e:
             logger.error(f"Error searching for transaction {txn.id}: {e}")
-            new_category = "Unknown"
+            new_category = "Uncategorized"
         # Update transaction's category.
         txn.category = new_category
         txn.is_indexed = 1  # Mark as processed.

@@ -29,6 +29,13 @@ class DescriptionRequest(BaseModel):
     description: str
 
 
+class NewTransactionRequest(BaseModel):
+    """NewTransactionRequest schema for creating a new transaction."""
+    description: str
+    amount: float
+    date: datetime.date
+    category: Optional[str] = None
+
 class UpdateTransactionRequest(BaseModel):
     transaction_id: int
     category: str
