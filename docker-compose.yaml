@@ -27,7 +27,7 @@ services:
     env_file:
       - path: api/.env
         required: true
-      - path: api/override.env
+      - path: api/.env.local
         required: false
     depends_on:
       - elasticsearch

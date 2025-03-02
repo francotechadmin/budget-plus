@@ -11,3 +11,6 @@ api/override.env
 client/override.env
 client/.env.development
 client/.env.production
+api/.env.override
+api/.env.dev
+api/.env.local

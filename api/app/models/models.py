@@ -58,6 +58,9 @@ class Transaction(Base):
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     is_deleted = Column(Integer, default=0)
+    is_imported = Column(Integer, default=0)
+    is_manual = Column(Integer, default=0)
+    is_linked = Column(Integer, default=0)
 
 class Budget(Base):
     __tablename__ = 'budgets'
