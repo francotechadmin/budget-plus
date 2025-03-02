@@ -148,9 +148,9 @@ const rootRoute = createRootRoute({
 
         {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
-          <div className="sm:hidden px-4 pb-2">
+          <div className="sm:hidden px-8 pb-2">
             <NavigationMenu>
-              <NavigationMenuList className="flex flex-col gap-2">
+              <NavigationMenuList className="">
                 <NavigationMenuItem>
                   <NavigationMenuLink
                     asChild
