@@ -35,5 +35,6 @@ export const useFetchTransactionsTotalsByMonthQuery = (
     queryKey: ["totals", year, month],
     queryFn: () => fetchTotalsByMonth({ year, month }),
     placeholderData: (prev) => prev,
+    enabled: !!year && !!month,
   });
 };

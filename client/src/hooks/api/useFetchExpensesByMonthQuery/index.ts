@@ -26,5 +26,6 @@ export const useFetchExpensesByMonthQuery = (
     queryKey: ["expenses", year, month],
     queryFn: () => fetchExpensesByMonth({ year, month }),
     placeholderData: (prev) => prev,
+    enabled: !!year && !!month,
   });
 };
