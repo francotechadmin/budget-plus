@@ -64,142 +64,6 @@ def get_transactions(
     logger.info(f"Returning {len(response)} transactions for user {current_user['sub']}.")
     return response
 
-# @router.post("/", summary="Upload bank transactions")
-# async def upload_bank_transactions(
-#     files: list[UploadFile] = File(...), 
-#     db: Session = Depends(get_db),
-#     current_user: dict = Depends(get_current_user)
-# ):
-#     """
-#     Upload bank transactions via CSV files.
-#     The endpoint detects the source (e.g. Chase or Citi) based on column names
-#     and processes the file accordingly.
-#     """
-#     logger.info(f"User {current_user['sub']} is uploading {len(files)} file(s).")
-    
-#     # Expected columns for each bank format
-#     chase_debit_columns = [
-#         'Details', 'Posting Date', 'Description', 'Amount', 'Type', 'Balance', 'Check or Slip #'
-#     ]
-#     chase_credit_columns = [
-#         'Transaction Date', 'Post Date', 'Description', 'Category', 'Type', 'Amount', 'Memo'
-#     ]
-#     citi_columns = ['Status', 'Date', 'Description', 'Debit', 'Credit']
-
-#     new_transactions = []
-#     searcher = Searcher()
-
-#     for file in files:
-#         logger.info(f"Processing file: {file.filename}")
-#         # Determine file source by reading the header
-#         try:
-#             df_preview = pd.read_csv(file.file, nrows=1)
-#             if 'Posting Date' in df_preview.columns:
-#                 source = 'chase_debit'
-#             elif 'Post Date' in df_preview.columns:
-#                 source = 'chase_credit'
-#             elif 'Date' in df_preview.columns:
-#                 source = 'citi'
-#             else:
-#                 logger.warning(f"File {file.filename} has unsupported format.")
-#                 raise HTTPException(status_code=400, detail="Unsupported file format.")
-#             logger.debug(f"Determined file source as {source} for file {file.filename}.")
-#         except Exception as e:
-#             logger.error(f"Failed to process file preview for {file.filename}: {e}")
-#             raise HTTPException(status_code=400, detail=f"Failed to process file: {str(e)}")
-        
-#         # Reset pointer for full read
-#         file.file.seek(0)
-        
-#         try:
-#             if source == 'chase_debit':
-#                 df = pd.read_csv(file.file, usecols=chase_debit_columns)
-#                 df = df.rename(columns={
-#                     'Description': 'description',
-#                     'Posting Date': 'date',
-#                     'Amount': 'amount',
-#                 })
-#             elif source == 'citi':
-#                 df = pd.read_csv(file.file, usecols=citi_columns)
-#                 # Calculate amount (debit negative, credit positive)
-#                 df['amount'] = df['Debit'].fillna(0) * -1 + df['Credit'].fillna(0)
-#                 df = df.rename(columns={
-#                     'Description': 'description',
-#                     'Date': 'date',
-#                 })
-#                 df = df[df['amount'].notna()]
-#             else:  # chase_credit
-#                 df = pd.read_csv(file.file, usecols=chase_credit_columns)
-#                 df = df.rename(columns={
-#                     'Description': 'description',
-#                     'Post Date': 'date',
-#                     'Amount': 'amount',
-#                 })
-#             logger.debug(f"File {file.filename} processed successfully with {len(df)} rows.")
-#         except Exception as e:
-#             logger.error(f"Error processing file {file.filename}: {e}")
-#             raise HTTPException(status_code=400, detail=f"Failed to process file: {str(e)}")
-        
-#         for idx, row in df.iterrows():
-#             # Check for duplicates by matching description, date, and amount for current user
-#             existing_txn = (
-#                 db.query(Transaction)
-#                 .filter(
-#                     Transaction.description == row['description'],
-#                     Transaction.date == row['date'],
-#                     Transaction.amount == row['amount'],
-#                     Transaction.user_id == current_user["sub"]
-#                 )
-#                 .first()
-#             )
-#             if existing_txn:
-#                 logger.debug(f"Duplicate transaction found for row {idx} in file {file.filename}. Skipping.")
-#                 continue
-
-#             # Use the searcher to determine the annotated category from the transaction description.
-#             try:
-#                 es_result = searcher.execute_search(
-#                     field="description",
-#                     shoulds=[row['description']]
-#                 )["hits"]["hits"]
-#                 annotated_category = es_result[0]["_source"]["annotated_category"] if es_result else "Uncategorized"
-#             except Exception as e:
-#                 logger.error(f"Error during Elasticsearch search for row {idx}: {e}")
-#                 annotated_category = "Uncategorized"
-            
-#             # Look up the Category in our database by name
-#             cat_entry = db.query(Category).filter(Category.name == annotated_category).first()
-#             if not cat_entry:
-#                 logger.warning(f"Category {annotated_category} not found for row {idx}. Falling back to 'Uncategorized'.")
-#                 cat_entry = db.query(Category).filter(Category.name == "Uncategorized").first()
-#                 if not cat_entry:
-#                     logger.error("No valid 'Uncategorized' category found in the database.")
-#                     raise HTTPException(status_code=400, detail="No valid category found for transaction.")
-            
-#             # Create the transaction using the foreign key to Category
-#             new_txn = Transaction(
-#                 user_id=current_user["sub"],
-#                 description=row['description'],
-#                 date=row['date'],
-#                 amount=row['amount'],
-#                 category_id=cat_entry.id
-#             )
-#             new_transactions.append(new_txn)
-#             logger.debug(f"Prepared new transaction for row {idx} in file {file.filename}.")
-        
-#     if new_transactions:
-#         try:
-#             db.bulk_save_objects(new_transactions)
-#             db.commit()
-#             logger.info(f"Inserted {len(new_transactions)} new transactions for user {current_user['sub']}.")
-#         except Exception as e:
-#             logger.error(f"Error inserting transactions: {e}")
-#             raise HTTPException(status_code=500, detail="Error saving transactions.")
-#     else:
-#         logger.info("No new transactions to insert.")
-    
-#     return get_transactions(db, current_user)
-
 @router.post("/", summary="Add a new transaction")
 def add_transaction(
     transaction: NewTransactionRequest,
@@ -228,7 +92,8 @@ def add_transaction(
         description=transaction.description,
         date=transaction.date,
         amount=transaction.amount,
-        category_id=category.id
+        category_id=category.id,
+        is_manual=1,
     )
     db.add(new_transaction)
 
@@ -797,7 +662,8 @@ async def import_bank_transactions(
             description=row['description'],
             date=row['date'],
             amount=row['amount'],
-            category_id=cat_entry.id
+            category_id=cat_entry.id,
+            is_imported=1,
         )
         new_transactions.append(new_txn)
         logger.debug(f"Row {idx} processed: Transaction added.")
