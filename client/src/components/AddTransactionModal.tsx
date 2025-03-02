@@ -16,6 +16,7 @@ import { Sections } from "@/models/sections";
 import { CategorySelect } from "./CategorySelect";
 import { useAddTransactionMutation } from "@/hooks/api/useAddTransactionMutation";
 import { Spinner } from "./ui/loader";
+import { DatePicker } from "./DatePicker";
 
 interface AddTransactionModalProps {
   sections: Sections; // Add categories as a prop
@@ -89,7 +90,7 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
           <SquarePlus className="lg:ml-1 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[90vw] lg:max-w-2xl rounded">
+      <DialogContent className="max-w-[90vw] lg:max-w-lg rounded">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
@@ -106,12 +107,13 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
             <label className="block text-sm font-medium text-gray-700">
               Date
             </label>
-            <Input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
+            <DatePicker
+              onDateChange={() =>
+                setFormData({
+                  ...formData,
+                  date: new Date().toISOString().split("T")[0],
+                })
+              }
             />
           </div>
           <div>

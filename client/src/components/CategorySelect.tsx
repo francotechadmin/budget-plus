@@ -23,7 +23,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
 }) => {
   return (
     <Select onValueChange={onChange} defaultValue={value}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a category" />
       </SelectTrigger>
       <SelectContent>
