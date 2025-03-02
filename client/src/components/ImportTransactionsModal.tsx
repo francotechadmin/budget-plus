@@ -42,14 +42,22 @@ export function ImportTransactionsModal() {
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectedFile(null); // Reset the file input when closing
+    }
+    setOpen(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="default">
-          Import Transactions <Import className="ml-1 w-4" />
+          <span className="hidden lg:block">Import Transactions</span>{" "}
+          <Import className="lg:ml-1 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-4xl">
+      <DialogContent className="max-w-[90vw] lg:max-w-2xl rounded">
         <DialogHeader>
           <DialogTitle>Import or Link Transactions</DialogTitle>
           <DialogDescription>

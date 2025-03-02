@@ -85,10 +85,11 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="default">
-          Add Transaction <SquarePlus className="ml-1 w-4" />
+          <span className="hidden lg:block">Add Transaction</span>{" "}
+          <SquarePlus className="lg:ml-1 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[90vw] lg:max-w-2xl rounded">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
