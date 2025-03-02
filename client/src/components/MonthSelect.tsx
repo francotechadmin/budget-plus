@@ -23,7 +23,7 @@ export function MonthSelect({
   }
 
   return (
-    <Select onValueChange={onMonthSelect} defaultValue={selectedMonth}>
+    <Select onValueChange={onMonthSelect} value={selectedMonth}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a month" />
       </SelectTrigger>

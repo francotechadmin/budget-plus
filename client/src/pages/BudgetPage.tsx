@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -16,35 +16,42 @@ import { useDeleteTransactionMutation } from "@/hooks/api/useDeleteTransactionMu
 import { useFetchGroupedTransactionsQuery } from "@/hooks/api/useFetchGroupedTransactionsQuery";
 
 const BudgetPage = () => {
-  // Initialize with the current month in "YYYY-MM" format.
-  const initialYear = new Date().getFullYear().toString();
-  const initialMonth = String(new Date().getMonth() + 1).padStart(2, "0");
-  const [selectedMonth, setSelectedMonth] = useState(
-    `${initialYear}-${initialMonth}`
-  );
+  // Use a single string "YYYY-MM" for the selected month.
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
   // Handler for month changes.
   const handleMonthSelect = (value: string) => {
     setSelectedMonth(value);
   };
 
-  // API hooks.
+  // Fetch available transaction dates.
   const { data: dates = [], isLoading: datesLoading } =
     useFetchTransactionsDatesQuery();
+
+  // Auto-select the latest available date once dates are loaded.
+  useEffect(() => {
+    if (!selectedMonth && dates.length > 0) {
+      const latest = dates.reduce(
+        (prev, curr) => (curr > prev ? curr : prev),
+        dates[0]
+      );
+      setSelectedMonth(latest);
+    }
+  }, [selectedMonth, dates]);
+
+  // Derive year and month from selectedMonth if available.
+  const year = selectedMonth ? selectedMonth.split("-")[0] : "";
+  const month = selectedMonth ? selectedMonth.split("-")[1] : "";
+
+  // API hooks.
   const { data: categories, isLoading: categoriesLoading } =
     useFetchCategories();
   const {
     data: totals = { income: 0, expenses: 0 },
     isLoading: totalsLoading,
-  } = useFetchTransactionsTotalsByMonthQuery(
-    selectedMonth.split("-")[0],
-    selectedMonth.split("-")[1]
-  );
+  } = useFetchTransactionsTotalsByMonthQuery(year, month);
   const { data: groupedData, isLoading: groupedLoading } =
-    useFetchGroupedTransactionsQuery(
-      selectedMonth.split("-")[0],
-      selectedMonth.split("-")[1]
-    );
+    useFetchGroupedTransactionsQuery(year, month);
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
   const handleDeleteTransaction = (id: string) => {
@@ -75,8 +82,6 @@ const BudgetPage = () => {
             dates={dates}
           />
         </div>
-        {/* Display loading state */}
-        {isLoading && <div className="text-gray-500">Loading...</div>}
         {/* Display total income vs. expenses */}
         <div className="flex gap-4">
           <div>

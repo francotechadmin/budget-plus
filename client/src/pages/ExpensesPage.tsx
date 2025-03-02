@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PieChart from "../components/PieChart";
 import { MonthSelect } from "../components/MonthSelect";
 import { useFetchExpensesByMonthQuery } from "@/hooks/api/useFetchExpensesByMonthQuery";
@@ -6,15 +6,10 @@ import { useFetchTransactionsDatesQuery } from "@/hooks/api/useFetchTransactions
 
 export default function ExpensesPage() {
   // Use a single string "YYYY-MM" for the selected month.
-  const [selectedMonth, setSelectedMonth] = useState(
-    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
-  );
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
   // Handler for when the month selection changes.
   const handleMonthSelect = (value: string) => setSelectedMonth(value);
-
-  // Extract year and month for the query hook.
-  const [year, month] = selectedMonth.split("-");
 
   // Fetch available transaction dates.
   const {
@@ -22,6 +17,24 @@ export default function ExpensesPage() {
     isLoading: datesLoading,
     error: datesError,
   } = useFetchTransactionsDatesQuery();
+
+  // When dates are available and no month is selected, set selectedMonth to the latest date.
+  useEffect(() => {
+    if (!selectedMonth && dates.length > 0) {
+      const latest = dates.reduce(
+        (prev, curr) => (curr > prev ? curr : prev),
+        dates[0]
+      );
+      setSelectedMonth(latest);
+    }
+  }, [selectedMonth, dates]);
+
+  // Derive year and month from selectedMonth (if available).
+  let year = "";
+  let month = "";
+  if (selectedMonth) {
+    [year, month] = selectedMonth.split("-");
+  }
 
   // Fetch expenses for the selected month.
   const {
