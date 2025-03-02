@@ -11,15 +11,14 @@ from sqlalchemy import func, case
 
 # Import dependencies
 from ..database.database import get_db
-from ..models.models import Transaction, Category, Section
+from ..models.models import Transaction, Category, Section, CategoryCorrections
 from ..schemas.schemas import UpdateTransactionRequest, NewTransactionRequest
-
-# Import Elasticsearch helper classes
-from ..elasticsearch_simple_client.uploader import Uploader
-from ..elasticsearch_simple_client.searcher import Searcher
 
 # Import authentication helper
 from ..auth import get_current_user
+
+# Import transaction categorization model
+from app.transaction_categorization.model import predict_category
 
 # Set up logger for this module
 logger = logging.getLogger(__name__)
@@ -41,7 +40,10 @@ def get_transactions(
             db.query(Transaction, Category.name.label("category_name"), Section.name.label("section_name"))
             .join(Category, Transaction.category_id == Category.id)
             .join(Section, Category.section_id == Section.id)
-            .filter(Transaction.user_id == current_user["sub"])
+            .filter(
+                Transaction.user_id == current_user["sub"], 
+                Transaction.is_deleted == 0
+            )
             .order_by(Transaction.date.desc())
             .all()
         )
@@ -74,17 +76,20 @@ def add_transaction(
     Add a new transaction for the current user.
     """
     logger.info(f"User {current_user['sub']} is adding a new transaction.")
+
+    category = None
     
     # Look up the category by name
     if transaction.category:
         category = db.query(Category).filter(Category.name == transaction.category).first()
+    
+    if not category:
+        # Use predict_category to determine the category
+        predicted_category = predict_category(transaction.description)
+        category = db.query(Category).filter(Category.name == predicted_category).first()
         if not category:
-            logger.warning(f"Category {transaction.category} not found. Defaulting to 'Uncategorized'.")
+            logger.warning(f"Predicted category {predicted_category} not found. Defaulting to 'Uncategorized'.")
             category = db.query(Category).filter(Category.name == "Uncategorized").first()
-    else:
-        logger.warning("No category provided. Defaulting to 'Uncategorized'.")
-        category = db.query(Category).filter(Category.name == "Uncategorized").first()
-
 
     # Add transaction
     new_transaction = Transaction(
@@ -138,7 +143,8 @@ def get_transactions_by_month(
             .join(Section, Category.section_id == Section.id)
             .filter(
                 Transaction.date.between(start_date, end_date),
-                Transaction.user_id == current_user["sub"]
+                Transaction.user_id == current_user["sub"],
+                Transaction.is_deleted == 0
             )
             .order_by(Section.name, Category.name, Transaction.date)
             .all()
@@ -203,7 +209,8 @@ def get_transactions_expenses(
                 Transaction.date <= end_date,
                 Transaction.user_id == current_user["sub"],
                 Section.name != 'Income',
-                Category.name != 'Transfer'
+                Category.name != 'Transfer',
+                Transaction.is_deleted == 0
             )
             .group_by(Category.name)
             .all()
@@ -255,7 +262,8 @@ def get_transactions_totals(
         ).join(Section, Category.section_id == Section.id
         ).filter(
             Transaction.date.between(start_date, end_date),
-            Transaction.user_id == current_user["sub"]
+            Transaction.user_id == current_user["sub"],
+            Transaction.is_deleted == 0
         ).one_or_none()
         
         # If there are no transactions, totals will be None.
@@ -303,7 +311,8 @@ def get_grouped_transactions(
             .join(Section, Category.section_id == Section.id)
             .filter(
                 Transaction.date.between(start_date, end_date),
-                Transaction.user_id == current_user["sub"]
+                Transaction.user_id == current_user["sub"],
+                Transaction.is_deleted == 0
             )
             .order_by(Section.name, Category.name, Transaction.date)
             .all()
@@ -369,6 +378,7 @@ def get_transactions_history(db: Session = Depends(get_db), current_user: dict =
             .filter(
                 Transaction.date >= six_months_ago,
                 Transaction.user_id == current_user["sub"],
+                Transaction.is_deleted == 0,
             )
             .all()
         )
@@ -407,7 +417,10 @@ def get_transactions_range(
         # Create a subquery that selects distinct months.
         subq = (
             db.query(func.to_char(Transaction.date, 'YYYY-MM').label("month"))
-            .filter(Transaction.user_id == current_user["sub"])
+            .filter(
+                Transaction.user_id == current_user["sub"],
+                Transaction.is_deleted == 0,
+            )
             .distinct()
             .subquery()
         )
@@ -432,7 +445,8 @@ def update_transaction(
     logger.info(f"User {current_user['sub']} requested update for transaction {update_request.transaction_id}.")
     txn = db.query(Transaction).filter(
         Transaction.id == update_request.transaction_id,
-        Transaction.user_id == current_user["sub"]
+        Transaction.user_id == current_user["sub"],
+        Transaction.is_deleted == 0
     ).first()
     if not txn:
         logger.warning(f"Transaction {update_request.transaction_id} not found for user {current_user['sub']}.")
@@ -443,32 +457,26 @@ def update_transaction(
     if not new_category:
         logger.warning(f"Category {update_request.category} not found for update request.")
         raise HTTPException(status_code=404, detail="Category not found.")
-    
+        
+    #Update the transaction's category in the CategoryCorrections table.
+    correction = CategoryCorrections(
+        user_id=current_user["sub"],
+        transaction_id=txn.id,
+        old_category_id=txn.category_id,
+        new_category_id=new_category.id
+    )
+    db.add(correction)
+
+    # Update the transaction's category.
     txn.category_id = new_category.id
+ 
     try:
         db.commit()
-        logger.info(f"Transaction {update_request.transaction_id} updated to category {update_request.category}.")
+        logger.info(f"Category correction recorded for transaction {txn.id}.")
     except Exception as e:
-        logger.error(f"Error updating transaction: {e}")
-        raise HTTPException(status_code=500, detail="Error updating transaction.")
-    
-    # Optionally update Elasticsearch if the flag is set.
-    if getattr(update_request, "index_es", True):
-        try:
-            uploader = Uploader()
-            # When indexing, include additional fields if needed (like user_id and default flag).
-            df = pd.DataFrame([{
-                'description': txn.description,
-                'annotated_category': update_request.category,
-                'user_id': current_user["sub"],
-                'default': False
-            }])
-            uploader.post_df(df)
-            logger.debug("Elasticsearch updated for transaction change.")
-        except Exception as e:
-            logger.error(f"Error updating Elasticsearch: {e}")
-            raise HTTPException(status_code=500, detail="Error updating Elasticsearch.")
-    
+        logger.error(f"Error recording category correction: {e}")
+        raise HTTPException(status_code=500, detail="Error recording category correction.")
+        
     # Return updated transaction 
     updated_txn = db.query(Transaction).filter(
         Transaction.id == update_request.transaction_id,
@@ -496,14 +504,16 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db), curre
     logger.info(f"User {current_user['sub']} requested deletion of transaction {transaction_id}.")
     txn = db.query(Transaction).filter(
         Transaction.id == transaction_id,
-        Transaction.user_id == current_user["sub"]
+        Transaction.user_id == current_user["sub"],
+        Transaction.is_deleted == 0
     ).first()
     if not txn:
         logger.warning(f"Transaction {transaction_id} not found for deletion.")
         raise HTTPException(status_code=404, detail="Transaction not found.")
     
+    # Mark the transaction as deleted.
+    txn.is_deleted = 1
     try:
-        db.delete(txn)
         db.commit()
         logger.info(f"Transaction {transaction_id} deleted for user {current_user['sub']}.")
     except Exception as e:
@@ -525,7 +535,9 @@ async def import_bank_transactions(
       - date
       - description
       - amount
-      - category
+
+    **Optional column:**
+        - category (if provided, will override the predicted category)
 
     Elasticsearch is only used if no valid category is provided in the file.
     If ES is available but the file provides a valid category, that value is used.
@@ -533,7 +545,7 @@ async def import_bank_transactions(
     """
     logger.info(f"User {current_user['sub']} is importing transactions from file: {file.filename}")
     new_transactions = []
-    required_columns = {"date", "description", "amount", "category"}
+    required_columns = {"date", "description", "amount"}
     
     # Determine file type by extension and read file into DataFrame.
     file_ext = file.filename.lower()
@@ -587,15 +599,6 @@ async def import_bank_transactions(
     # Build a set of keys for quick duplicate lookup.
     existing_keys = set((txn.description, txn.date, txn.amount, txn.category_id) for txn in existing_txns)
 
-    # Instantiate the Elasticsearch searcher.
-    searcher = Searcher()
-    try:
-        es_available = searcher.ping()
-        logger.info("Elasticsearch is available.")
-    except Exception as e:
-        es_available = False
-        logger.error(f"Elasticsearch ping failed: {e}")
-
     # Process each row of the DataFrame.
     for idx, row in df.iterrows():
         # Skip rows with missing required fields.
@@ -606,27 +609,23 @@ async def import_bank_transactions(
         logger.debug(f"Processing row {idx} of file {file.filename}.")
         
         # Determine the final category.
-        file_category = str(row['category']).strip() if pd.notna(row['category']) else ""
+        file_category = row.get('category', None)
         if file_category:
             final_category = file_category
             logger.debug(f"Row {idx}: Using provided category: {final_category}")
         else:
-            # If no valid category is provided, try Elasticsearch if available.
-            annotated_category = None
-            if es_available:
-                try:
-                    es_result = searcher.execute_search(
-                        field="description",
-                        shoulds=[row['description']]
-                    )
-                    hits = es_result.get("hits", {}).get("hits", [])
-                    if hits:
-                        annotated_category = hits[0]["_source"].get("annotated_category")
-                        logger.debug(f"Row {idx}: ES annotated category: {annotated_category}")
-                except Exception as e:
-                    logger.error(f"Error during Elasticsearch search for row {idx}: {e}")
-            final_category = annotated_category if annotated_category else "Uncategorized"
-            logger.debug(f"Row {idx}: Final category from ES fallback: {final_category}")
+            # Use Predictor to get category.
+            predicted_category = predict_category(row['description'])
+            logger.debug(f"Row {idx}: Predicted category: {predicted_category}")
+
+            # If the predicted category is valid, use it.
+            # If not, default to "Uncategorized".
+            if predicted_category.lower() in categories_dict:
+                final_category = predicted_category
+                logger.debug(f"Row {idx}: Using predicted category: {final_category}")
+            else:
+                final_category = "Uncategorized"
+                logger.warning(f"Row {idx}: No valid category found. Defaulting to 'Uncategorized'.")
         
         # Look up the category in our pre-fetched dictionary.
         cat_entry = categories_dict.get(final_category.lower())
