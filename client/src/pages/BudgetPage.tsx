@@ -14,6 +14,7 @@ import { useFetchTransactionsTotalsByMonthQuery } from "@/hooks/api/useFetchTran
 import { useFetchCategories } from "@/hooks/api/useFetchCategoriesQuery";
 import { useDeleteTransactionMutation } from "@/hooks/api/useDeleteTransactionMutation";
 import { useFetchGroupedTransactionsQuery } from "@/hooks/api/useFetchGroupedTransactionsQuery";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const BudgetPage = () => {
   // Use a single string "YYYY-MM" for the selected month.
@@ -44,13 +45,13 @@ const BudgetPage = () => {
   const month = selectedMonth ? selectedMonth.split("-")[1] : "";
 
   // API hooks.
-  const { data: categories, isLoading: categoriesLoading } =
+  const { data: categories = {}, isLoading: categoriesLoading } =
     useFetchCategories();
   const {
     data: totals = { income: 0, expenses: 0 },
     isLoading: totalsLoading,
   } = useFetchTransactionsTotalsByMonthQuery(year, month);
-  const { data: groupedData, isLoading: groupedLoading } =
+  const { data: groupedData = [], isLoading: groupedLoading } =
     useFetchGroupedTransactionsQuery(year, month);
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
@@ -61,13 +62,26 @@ const BudgetPage = () => {
   // Combine loading states.
   const isLoading =
     datesLoading || categoriesLoading || totalsLoading || groupedLoading;
-  if (isLoading) {
-    return <div className="text-center p-4">Loading...</div>;
-  }
 
-  // Check for missing data.
-  if (!dates || !categories || !totals || !groupedData) {
-    return <div>Error fetching data.</div>;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 mt-4">
+        <h1 className="text-2xl font-bold py-2">Budget</h1>
+        <Skeleton className="h-28 w-full mt-4" />
+        <div className="mt-8">
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+        </div>
+        <div className="mt-4">
+          <Skeleton className="h-12 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+        </div>
+      </div>
+    );
   }
 
   return (
