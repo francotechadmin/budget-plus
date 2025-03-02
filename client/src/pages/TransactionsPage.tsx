@@ -48,8 +48,13 @@ export default function TransactionsPage() {
     return (
       <div className="container mx-auto pl-4 mt-4">
         <h1 className="text-2xl font-bold">Transactions</h1>
-        <Skeleton className="h-6 w-1/2 mt-4" />
+        <Skeleton className="h-8 w-1/2 mt-4" />
         <div className="mt-4">
+          <Skeleton className="h-8 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-full mb-2" />
