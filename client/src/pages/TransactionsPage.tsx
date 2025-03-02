@@ -16,6 +16,7 @@ import { useDeleteTransactionMutation } from "@/hooks/api/useDeleteTransactionMu
 import { AddTransactionModal } from "../components/AddTransactionModal";
 import { ImportTransactionsModal } from "../components/ImportTransactionsModal";
 import { Spinner } from "@/components/ui/loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TransactionsPage() {
   const {
@@ -33,19 +34,32 @@ export default function TransactionsPage() {
 
   const deleteTransactionMutation = useDeleteTransactionMutation();
 
-  if (transactionsLoading || categoriesLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (transError || catError) {
-    return <div>Error fetching data.</div>;
-  }
-
   const deleteTransactionHandler = (id: string) => {
     deleteTransactionMutation.mutate(id);
   };
 
   const columns = createColumns(sections, deleteTransactionHandler);
+
+  if (transError || catError) {
+    return <div>Error fetching data.</div>;
+  }
+
+  if (transactionsLoading || categoriesLoading) {
+    return (
+      <div className="container mx-auto pl-4 mt-4">
+        <h1 className="text-2xl font-bold">Transactions</h1>
+        <Skeleton className="h-6 w-1/2 mt-4" />
+        <div className="mt-4">
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto pl-4 mt-4">
