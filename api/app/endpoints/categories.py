@@ -1,5 +1,6 @@
 import io
 import logging
+from fastapi.responses import JSONResponse
 import pandas as pd
 from fastapi import APIRouter, UploadFile, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,6 +8,8 @@ from sqlalchemy.orm import Session
 from ..database.database import get_db
 from ..auth import get_current_user
 from ..models.models import Category, Section
+from ..schemas.schemas import DescriptionRequest
+from ..transaction_categorization.model import predict_category_with_confidence
 
 router = APIRouter()
 
@@ -128,3 +131,30 @@ def add_sections(
     logging.info("Sections added to transactions.")
     return {"message": "Sections added to transactions."}
  
+@router.post("/predict", summary="Predict category for a transaction")
+def predict_category_endpoint(
+    request: DescriptionRequest,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Predict the category for a given transaction description.
+    The prediction is based on a pre-trained model.
+    """
+    description = request.description
+    if not description:
+        raise HTTPException(status_code=400, detail="Description is required.") 
+    logging.info(f"Predicting category for description: {description}")
+    
+    # Use the pre-trained model to predict the category
+    predicted_category, confidence, is_uncertain = predict_category_with_confidence(description)
+    logging.info(f"Predicted category: {predicted_category}, Confidence: {confidence}, Uncertain: {is_uncertain}")
+    
+    return JSONResponse(
+        content={
+            "predicted_category": predicted_category,
+            "confidence": confidence,
+            "is_uncertain": str(is_uncertain)
+        }
+    )
+    
