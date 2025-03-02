@@ -78,3 +78,14 @@ class Budget(Base):
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     is_deleted = Column(Integer, default=0)
+
+class CategoryCorrections(Base):
+    __tablename__ = 'category_corrections'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey('users.id'), index=True)
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), index=True)
+    old_category_id = Column(Integer, ForeignKey('categories.id'), index=True)
+    new_category_id = Column(Integer, ForeignKey('categories.id'), index=True)
+    created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
