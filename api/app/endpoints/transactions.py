@@ -582,22 +582,43 @@ async def import_bank_transactions(
     # Build a lookup dictionary using lower-case keys.
     categories_dict = {cat.name.lower(): cat for cat in categories_db}
     
-    # Pre-fetch existing transactions in the file's date range to avoid duplicate checks per row.
+    # Convert file date column to proper date objects.
     try:
-        # Convert file date column to datetime if not already.
         df['date'] = pd.to_datetime(df['date']).dt.date
     except Exception as e:
         logger.error(f"Error converting date column: {e}")
         raise HTTPException(status_code=400, detail="Invalid date format in file.")
-
+    
+    # Determine the date range in the file.
     min_date = df['date'].min()
     max_date = df['date'].max()
-    existing_txns = db.query(Transaction).filter(
+
+    # Pre-fetch counts of existing transactions from the DB in this date range.
+    db_txns = db.query(
+        Transaction.description,
+        Transaction.date,
+        Transaction.amount,
+        Transaction.category_id,
+        func.count(Transaction.id).label("count")
+    ).filter(
         Transaction.user_id == current_user["sub"],
-        Transaction.date.between(min_date, max_date)
+        Transaction.date.between(min_date, max_date),
+        Transaction.is_deleted == 0,
+    ).group_by(
+        Transaction.description,
+        Transaction.date,
+        Transaction.amount,
+        Transaction.category_id
     ).all()
-    # Build a set of keys for quick duplicate lookup.
-    existing_keys = set((txn.description, txn.date, txn.amount, txn.category_id) for txn in existing_txns)
+
+    # Build a lookup dictionary: key -> count
+    db_counts = {}
+    for desc, d, amt, cat_id, count in db_txns:
+        key = (desc, d, amt, cat_id)
+        db_counts[key] = count
+
+    # Dictionary to count occurrences within the file.
+    file_counts = {}
 
     # Process each row of the DataFrame.
     for idx, row in df.iterrows():
@@ -648,12 +669,13 @@ async def import_bank_transactions(
         
         # Build a duplicate key for this transaction.
         txn_key = (row['description'], row['date'], row['amount'], cat_entry.id)
-        if txn_key in existing_keys:
-            logger.debug(f"Duplicate transaction found for row {idx}. Skipping.")
-            continue
+        file_counts[txn_key] = file_counts.get(txn_key, 0) + 1
 
-        # Add the new key so that subsequent rows in the file are compared.
-        existing_keys.add(txn_key)
+        # Compare file count to DB count.
+        db_count = db_counts.get(txn_key, 0)
+        if file_counts[txn_key] <= db_count:
+            logger.debug(f"Row {idx}: Duplicate detected (file count {file_counts[txn_key]}, DB count {db_count}). Skipping.")
+            continue
 
         # Create a new Transaction record.
         new_txn = Transaction(
