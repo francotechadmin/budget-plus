@@ -213,6 +213,22 @@ const rootRoute = createRootRoute({
       </>
     );
   },
+  notFoundComponent: function NotFound() {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center">
+        <h1 className="text-4xl font-bold">404 - Page Not Found</h1>
+        <br />
+        <div className="flex flex-col items-center">
+          <p className="text-lg">
+            The page you are looking for does not exist.
+          </p>
+          <Link to={`${basePath}`} className="text-blue-500 underline">
+            Go back
+          </Link>
+        </div>
+      </div>
+    );
+  },
 });
 
 const indexRoute = createRoute({
