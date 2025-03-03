@@ -1,27 +1,14 @@
 // pages/Homepage.tsx
-import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { BookOpenText, LogIn, Moon, Notebook, Sun } from "lucide-react";
 import screenRecording from "@/assets/screen-recording.mp4";
+import { useTheme } from "@/hooks/useTheme";
 
 const Homepage = () => {
   const { loginWithRedirect } = useAuth0();
 
-  // Read the current theme from the body class (this could be improved to persist theme in a global store)
-  const [isDark, setIsDark] = useState(() =>
-    document.body.classList.contains("dark")
-  );
-
-  // Optionally, listen to theme changes if they're applied elsewhere
-  useEffect(() => {
-    setIsDark(document.body.classList.contains("dark"));
-  }, []);
-
-  const toggleTheme = () => {
-    document.body.classList.toggle("dark");
-    setIsDark(!isDark);
-  };
+  const { theme, toggleTheme } = useTheme();
 
   const handleLearnMore = () => {
     window.open("https://github.com/francotechadmin/budget-plus", "_blank");
@@ -37,7 +24,7 @@ const Homepage = () => {
         </div>
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={toggleTheme}>
-            {isDark ? (
+            {theme == "dark" ? (
               <Sun className="h-5 w-5" />
             ) : (
               <Moon className="h-5 w-5" />
