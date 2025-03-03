@@ -1,11 +1,11 @@
 // src/hooks/api/useFetchTransactionsDatesQuery/index.ts
 
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 export const useFetchTransactionsDatesQuery = (): UseQueryResult<string[]> => {
   const fetchDates = async (): Promise<string[]> => {
-    const response = await axios.get<string[]>(
+    const response = await api.get<string[]>(
       `${import.meta.env.VITE_API_URL}/transactions/range`
     );
     return response.data;

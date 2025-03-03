@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   keepPreviousData,
   useQuery,
@@ -7,7 +7,7 @@ import {
 import { Transaction } from "@/models/transactions";
 
 const fetchTransactions = async (): Promise<Transaction[]> => {
-  const response = await axios.get("/transactions/");
+  const response = await api.get("/transactions/");
   return response.data;
 };
 

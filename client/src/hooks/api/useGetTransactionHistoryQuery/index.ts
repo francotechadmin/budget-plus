@@ -1,6 +1,6 @@
 // src/hooks/api/useGetTransactionHistoryQuery/index.ts
 
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 interface FetchTransactionHistoryResponse {
@@ -12,7 +12,7 @@ interface FetchTransactionHistoryResponse {
 
 export const fetchTransactionHistory =
   async (): Promise<FetchTransactionHistoryResponse> => {
-    const response = await axios.get("/transactions/history");
+    const response = await api.get("/transactions/history");
     return response.data;
   };
 

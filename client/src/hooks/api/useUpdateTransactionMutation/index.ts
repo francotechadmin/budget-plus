@@ -1,5 +1,5 @@
 // src/hooks/api/useUpdateTransactionMutation/index.ts
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   useMutation,
   UseMutationResult,
@@ -15,7 +15,7 @@ const updateTransactionFn = async ({
   id,
   category,
 }: UpdateTransactionMutationVariables): Promise<Transaction> => {
-  const response = await axios.post<Transaction>(`transactions/update`, {
+  const response = await api.post<Transaction>(`transactions/update`, {
     transaction_id: id,
     category: category,
   });

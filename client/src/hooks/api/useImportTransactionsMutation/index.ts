@@ -1,5 +1,5 @@
 // src/hooks/api/useImportTransactionsMutation/index.ts
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   useMutation,
   UseMutationResult,
@@ -16,7 +16,7 @@ const importTransactionsFn = async (
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await axios.post<ImportTransactionsResponse>(
+  const response = await api.post<ImportTransactionsResponse>(
     "/transactions/import",
     formData,
     {

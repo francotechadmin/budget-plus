@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 
 interface UpsertUserResponse {
@@ -11,7 +11,7 @@ interface UpsertUserResponse {
 const upsertUserFn = async (): Promise<UpsertUserResponse> => {
   // Extract user information from the token
 
-  const response = await axios.post<UpsertUserResponse>("/users/");
+  const response = await api.post<UpsertUserResponse>("/users/");
   return response.data;
 };
 

@@ -1,5 +1,5 @@
 // src/hooks/api/useDeleteTransactionMutation/index.ts
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   useMutation,
   UseMutationResult,
@@ -14,7 +14,7 @@ interface DeleteProjectResponse {
 const deleteProjectFn = async (
   transactionId: string
 ): Promise<DeleteProjectResponse> => {
-  const response = await axios.delete<DeleteProjectResponse>(
+  const response = await api.delete<DeleteProjectResponse>(
     `/transactions/${transactionId}`
   );
   return response.data;

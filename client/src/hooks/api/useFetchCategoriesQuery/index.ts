@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   keepPreviousData,
   useQuery,
@@ -7,7 +7,7 @@ import {
 import { Sections } from "@/models/sections";
 
 const fetchCategories = async (): Promise<Sections> => {
-  const response = await axios.get("/categories/");
+  const response = await api.get("/categories/");
   return response.data;
 };
 

@@ -2,7 +2,7 @@
 
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { GroupedTransaction } from "@/models/groupedTransactions";
-import axios from "axios";
+import { api } from "@/lib/axios";
 
 interface FetchGroupedTransactionsQueryVariables {
   year: string;
@@ -13,7 +13,7 @@ const fetchGroupedTransactions = async ({
   year,
   month,
 }: FetchGroupedTransactionsQueryVariables): Promise<GroupedTransaction[]> => {
-  const response = await axios.get<GroupedTransaction[]>(
+  const response = await api.get<GroupedTransaction[]>(
     `/transactions/grouped/${year}/${month}`
   );
   return response.data;

@@ -1,6 +1,6 @@
 // src/hooks/api/useFetchTransactionsTotalsByMonthQuery/index.ts
 
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 // import { Transaction } from "@/models/transactions";
 interface FetchTransactionsByMonthQueryVariables {
@@ -17,7 +17,7 @@ const fetchTotalsByMonth = async ({
   year,
   month,
 }: FetchTransactionsByMonthQueryVariables): Promise<FetchTransactionsByMonthResponse> => {
-  const response = await axios.get<FetchTransactionsByMonthResponse>(
+  const response = await api.get<FetchTransactionsByMonthResponse>(
     `/transactions/totals/${year}/${month}`
   );
   return response.data;

@@ -1,19 +1,20 @@
+// lib/api.ts
 import axios from "axios";
 
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 // adds access tokens in all api requests
-// this interceptor is only added when the auth0 instance is ready and exports the getAccessTokenSilently method
-export const addAccessTokenInterceptor = (
+export function addAccessTokenInterceptor(
   getAccessTokenSilently: () => Promise<string>
-) => {
-  axios.interceptors.request.use(async (config) => {
+) {
+  api.interceptors.request.use(async (config) => {
+    // Get the token (wait for it before proceeding)
     const token = await getAccessTokenSilently();
-    config.headers.Authorization = `Bearer ${token}`;
-
-    // root url for api requests
-    config.baseURL = import.meta.env.VITE_API_URL;
-
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   });
-};
-
-// export default httpClient;
+}
