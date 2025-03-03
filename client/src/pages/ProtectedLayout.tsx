@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "../components/ui/button";
 import WelcomeModal from "@/components/WelcomeModal";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const basePath = (import.meta.env.VITE_BASE_PATH as string) || "/";
 
@@ -74,6 +75,8 @@ function ProtectedLayoutComponent() {
           {showWelcome && (
             <WelcomeModal onClose={() => setShowWelcome(false)} />
           )}
+
+          <InstallPrompt />
 
           {/* Desktop Navigation Menu */}
           <div className="hidden sm:block">
