@@ -192,7 +192,7 @@ function App() {
     <StrictMode>
       <Auth0ProviderWithRedirectCallback {...providerConfig}>
         <QueryClientProvider client={queryClient}>
-          <div className="App h-screen max-w-6xl mx-auto flex flex-col overflow-hidden">
+          <div className="App h-screen max-w-6xl mx-auto flex flex-col">
             <RouterProvider router={router} />
           </div>
         </QueryClientProvider>
