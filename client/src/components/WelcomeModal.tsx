@@ -17,7 +17,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onClose }) => {
       ></div>
 
       {/* Modal Content */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-[90vw] xl:max-w-lg w-full p-6 z-51">
+      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-[90vw] xl:max-w-lg w-full p-6 z-50">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center flex-wrap">
             Welcome to <Notebook className="w-5 ml-2 mr-1" /> Budget+

@@ -42,7 +42,7 @@ function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-72 p-4 rounded-md shadow-md bg-white text-black z-50 border border-gray-200">
+    <div className="fixed bottom-4 right-4 w-72 p-4 rounded-md shadow-md bg-white text-black z-40 border border-gray-200">
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-semibold text-sm">
           Install App to Home Screen for Easier Access!
