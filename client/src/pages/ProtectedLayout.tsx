@@ -4,8 +4,9 @@ import { Outlet, Link } from "@tanstack/react-router";
 import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import Loading from "../components/ui/loading";
 import { addAccessTokenInterceptor } from "../lib/axios";
+import { useTheme } from "@/hooks/useTheme";
 import { useUpsertUserMutation } from "../hooks/api/useUserUpsertMutation";
-import { Notebook, Menu, X, Moon, LogOut } from "lucide-react";
+import { Notebook, Menu, X, Sun, Moon, LogOut } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -14,19 +15,21 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "../components/ui/button";
+import WelcomeModal from "@/components/WelcomeModal";
 
 const basePath = (import.meta.env.VITE_BASE_PATH as string) || "/";
 
 function ProtectedLayoutComponent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const { logout, isLoading } = useAuth0();
   const {
     mutate: upsertUser,
     isPending: isUpserting,
     isError,
-  } = useUpsertUserMutation();
+  } = useUpsertUserMutation({ setShowWelcome });
   const [tokenAdded, setTokenAdded] = useState(false);
-
+  const { theme, toggleTheme } = useTheme();
   const { getAccessTokenSilently } = useAuth0();
 
   // Add access token interceptor
@@ -67,6 +70,10 @@ function ProtectedLayoutComponent() {
             <Notebook className="h-6 w-6" />
             <span className="font-bold text-2xl px-1">Budget+</span>
           </div>
+
+          {showWelcome && (
+            <WelcomeModal onClose={() => setShowWelcome(false)} />
+          )}
 
           {/* Desktop Navigation Menu */}
           <div className="hidden sm:block">
@@ -128,20 +135,12 @@ function ProtectedLayoutComponent() {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {/* Toggle Mode Button */}
-          <Button
-            variant="outline"
-            className="h-8 hidden sm:flex items-center"
-            onClick={() => document.body.classList.toggle("dark")}
-          >
-            Toggle Mode
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 sm:hidden p-2 flex items-center justify-center"
-            onClick={() => document.body.classList.toggle("dark")}
-          >
-            <Moon className="h-4 w-4" />
+          <Button variant="outline" onClick={toggleTheme}>
+            {theme == "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </Button>
 
           {/* Logout Button */}
