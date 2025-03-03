@@ -5,6 +5,7 @@ from ..crud.crud import get_user, create_user
 from ..database.database import get_db
 from ..auth import get_current_user, get_user_info
 import logging
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -20,9 +21,9 @@ def create_user_endpoint(db: Session = Depends(get_db), current_user: dict = Dep
     db_user = get_user(db, user_id=user.id)
     if db_user:
         logger.info(f"User with ID: {current_user['sub']} already exists.")
-        return db_user
+        return JSONResponse(status_code=200, content={"message": "User already exists"})
     logger.info(f"Creating new user with ID: {current_user['sub']}")
-    return create_user(db=db, user=user)
+    return JSONResponse(status_code=201, content=create_user(db=db, user=user))
 
 @router.get("/", response_model=UserRead)
 def read_user(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):

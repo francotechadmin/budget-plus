@@ -32,7 +32,13 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     created_sections = create_default_sections(db, user.id, default_sections)
     create_default_categories(db, user.id, created_sections)
-    return db_user
+    user = {
+        "id": db_user.id,
+        "email": db_user.email,
+        "name": db_user.name,
+        "is_admin": db_user.is_admin,
+    }
+    return user
 
 def create_default_sections(db: Session, user_id: str, default_sections: list) -> list:
     """
