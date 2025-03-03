@@ -93,6 +93,10 @@ export default ({ mode }: { mode: string }) => {
           enabled: true,
           /* other options */
         },
+        workbox: {
+          ignoreURLParametersMatching: [/.*/],
+          /* other options */
+        },
       }),
     ],
     resolve: {

@@ -20,22 +20,41 @@ const basePath = (import.meta.env.VITE_BASE_PATH as string) || "/";
 function ProtectedLayoutComponent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout, isLoading } = useAuth0();
-  const upsertUserMutation = useUpsertUserMutation();
+  const {
+    mutate: upsertUser,
+    isPending: isUpserting,
+    isError,
+  } = useUpsertUserMutation();
+  const [tokenAdded, setTokenAdded] = useState(false);
 
   const { getAccessTokenSilently } = useAuth0();
 
   // Add access token interceptor
   useEffect(() => {
-    addAccessTokenInterceptor(getAccessTokenSilently);
+    // add interceptor and set tokenAdded to true when done
+    const addInterceptor = async () => {
+      await addAccessTokenInterceptor(getAccessTokenSilently);
+      setTokenAdded(true);
+    };
+    addInterceptor();
   }, []);
 
   // Upsert user on mount (only run when not loading and without error)
   useEffect(() => {
-    upsertUserMutation.mutate();
-  }, []);
+    if (tokenAdded) {
+      console.log("Upserting user");
+      upsertUser();
+    }
+  }, [tokenAdded]);
 
-  if (isLoading) {
+  if (isLoading || isUpserting) {
+    // Show loading screen while loading
     return <Loading />;
+  }
+
+  if (isError) {
+    // Show error screen if there was an error
+    return <div>Error</div>;
   }
 
   return (
@@ -210,7 +229,8 @@ function ProtectedLayoutComponent() {
       )}
 
       <hr />
-      <Outlet />
+      {/* only show if token has been added to request */}
+      {tokenAdded && <Outlet />}
     </>
   );
 }
