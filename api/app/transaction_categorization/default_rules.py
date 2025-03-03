@@ -2951,5 +2951,725 @@ default_rules = [
     {
         "description": "Zelle payment from PERSON  23539431010",
         "category": "Refunds"
-    }
+    },
+      {
+    "description": "March Salary",
+    "category": "Salary"
+  },
+  {
+    "description": "March Bonus",
+    "category": "Bonus"
+  },
+  {
+    "description": "Interest from Savings",
+    "category": "Interest Income"
+  },
+  {
+    "description": "Refund from Vendor",
+    "category": "Refunds"
+  },
+  {
+    "description": "Monthly Rent",
+    "category": "Rent"
+  },
+  {
+    "description": "Home Insurance Payment",
+    "category": "Home Insurance"
+  },
+  {
+    "description": "Electricity Bill",
+    "category": "Electricity"
+  },
+  {
+    "description": "Water Bill",
+    "category": "Water"
+  },
+  {
+    "description": "Gas Bill",
+    "category": "Gas"
+  },
+  {
+    "description": "Phone Service Bill",
+    "category": "Phone Service"
+  },
+  {
+    "description": "Internet Bill",
+    "category": "Internet"
+  },
+  {
+    "description": "Fuel for Car",
+    "category": "Fuel"
+  },
+  {
+    "description": "Public Transport Fare",
+    "category": "Public Transport"
+  },
+  {
+    "description": "Car Insurance",
+    "category": "Car Insurance"
+  },
+  {
+    "description": "Vehicle Maintenance",
+    "category": "Vehicle Maintenance"
+  },
+  {
+    "description": "Highway Tolls",
+    "category": "Tolls"
+  },
+  {
+    "description": "Parking Fee",
+    "category": "Parking"
+  },
+  {
+    "description": "Groceries at Supermarket",
+    "category": "Groceries"
+  },
+  {
+    "description": "Dinner at Restaurant",
+    "category": "Restaurants"
+  },
+  {
+    "description": "Coffee at Cafe",
+    "category": "Cafes"
+  },
+  {
+    "description": "Lunch - Fast Food",
+    "category": "Fast Food"
+  },
+  {
+    "description": "Drinks at Bar",
+    "category": "Bars & Alcohol"
+  },
+  {
+    "description": "Health Insurance Premium",
+    "category": "Health Insurance"
+  },
+  {
+    "description": "Gym Membership Fee",
+    "category": "Gym Membership"
+  },
+  {
+    "description": "Doctor Visit",
+    "category": "Doctor Visits"
+  },
+  {
+    "description": "Dental Checkup",
+    "category": "Dental Services"
+  },
+  {
+    "description": "Pharmacy Purchase",
+    "category": "Pharmacy"
+  },
+  {
+    "description": "Prescription Medicine",
+    "category": "Prescriptions"
+  },
+  {
+    "description": "Movie Night",
+    "category": "Movies"
+  },
+  {
+    "description": "Concert Ticket",
+    "category": "Concerts"
+  },
+  {
+    "description": "Netflix Subscription",
+    "category": "Streaming Services"
+  },
+  {
+    "description": "Gaming Subscription",
+    "category": "Gaming"
+  },
+  {
+    "description": "Amusement Park Activity",
+    "category": "Activities"
+  },
+  {
+    "description": "Magazine Subscription",
+    "category": "Subscriptions"
+  },
+  {
+    "description": "New Clothing Purchase",
+    "category": "Clothing"
+  },
+  {
+    "description": "Electronics Purchase",
+    "category": "Electronics"
+  },
+  {
+    "description": "Household Items Purchase",
+    "category": "Household Items"
+  },
+  {
+    "description": "Online Shopping Order",
+    "category": "Online Shopping"
+  },
+  {
+    "description": "Beauty Products",
+    "category": "Beauty & Personal Care"
+  },
+  {
+    "description": "Tuition Payment",
+    "category": "Tuition Fees"
+  },
+  {
+    "description": "School Supplies",
+    "category": "School Supplies"
+  },
+  {
+    "description": "Books Purchase",
+    "category": "Books & Materials"
+  },
+  {
+    "description": "Flight Booking",
+    "category": "Flights"
+  },
+  {
+    "description": "Hotel Reservation",
+    "category": "Hotels"
+  },
+  {
+    "description": "Car Rental",
+    "category": "Car Rentals"
+  },
+  {
+    "description": "Taxi Ride",
+    "category": "Taxi Service"
+  },
+  {
+    "description": "Money Transfer to Savings",
+    "category": "Transfer"
+  },
+  {
+    "description": "Credit Card Payment",
+    "category": "Credit Card Payments"
+  },
+  {
+    "description": "Student Loan Repayment",
+    "category": "Student Loans"
+  },
+  {
+    "description": "Federal Tax Deduction",
+    "category": "Federal Taxes"
+  },
+  {
+    "description": "Tax Refund Received",
+    "category": "Tax Refund"
+  },
+  {
+    "description": "Bank Fee Charge",
+    "category": "Bank Fees"
+  },
+  {
+    "description": "ATM Withdrawal Fee",
+    "category": "ATM Fees"
+  },
+  {
+    "description": "Foreign Transaction Fee",
+    "category": "Foreign Transaction Fees"
+  },
+  {
+    "description": "Charitable Donation",
+    "category": "Charitable Donations"
+  },
+  {
+    "description": "Gift Purchase",
+    "category": "Gifts"
+  },
+  {
+    "description": "Miscellaneous Expense",
+    "category": "Other Expenses"
+  },
+  {
+    "description": "Other Income Bonus",
+    "category": "Other Income"
+  },
+  {
+    "description": "Uncategorized Expense",
+    "category": "Uncategorized"
+  },
+  {
+    "description": "Miscellaneous Refund",
+    "category": "Other Income"
+  },
+  {
+    "description": "February Salary",
+    "category": "Salary"
+  },
+  {
+    "description": "February Bonus",
+    "category": "Bonus"
+  },
+  {
+    "description": "Interest from Savings",
+    "category": "Interest Income"
+  },
+  {
+    "description": "Vendor Refund",
+    "category": "Refunds"
+  },
+  {
+    "description": "Rent Payment",
+    "category": "Rent"
+  },
+  {
+    "description": "Home Insurance Payment",
+    "category": "Home Insurance"
+  },
+  {
+    "description": "Electricity Bill",
+    "category": "Electricity"
+  },
+  {
+    "description": "Water Bill",
+    "category": "Water"
+  },
+  {
+    "description": "Gas Bill",
+    "category": "Gas"
+  },
+  {
+    "description": "Phone Service Bill",
+    "category": "Phone Service"
+  },
+  {
+    "description": "Internet Bill",
+    "category": "Internet"
+  },
+  {
+    "description": "Fuel Purchase",
+    "category": "Fuel"
+  },
+  {
+    "description": "Public Transport Fare",
+    "category": "Public Transport"
+  },
+  {
+    "description": "Car Insurance Payment",
+    "category": "Car Insurance"
+  },
+  {
+    "description": "Vehicle Maintenance",
+    "category": "Vehicle Maintenance"
+  },
+  {
+    "description": "Highway Tolls",
+    "category": "Tolls"
+  },
+  {
+    "description": "Parking Fee",
+    "category": "Parking"
+  },
+  {
+    "description": "Groceries Shopping",
+    "category": "Groceries"
+  },
+  {
+    "description": "Dinner at Restaurant",
+    "category": "Restaurants"
+  },
+  {
+    "description": "Coffee at Cafe",
+    "category": "Cafes"
+  },
+  {
+    "description": "Lunch at Fast Food",
+    "category": "Fast Food"
+  },
+  {
+    "description": "Drinks at Bar",
+    "category": "Bars & Alcohol"
+  },
+  {
+    "description": "Health Insurance Premium",
+    "category": "Health Insurance"
+  },
+  {
+    "description": "Gym Membership Fee",
+    "category": "Gym Membership"
+  },
+  {
+    "description": "Doctor Visit",
+    "category": "Doctor Visits"
+  },
+  {
+    "description": "Dental Checkup",
+    "category": "Dental Services"
+  },
+  {
+    "description": "Pharmacy Purchase",
+    "category": "Pharmacy"
+  },
+  {
+    "description": "Prescription Medicine",
+    "category": "Prescriptions"
+  },
+  {
+    "description": "Movie Ticket",
+    "category": "Movies"
+  },
+  {
+    "description": "Concert Ticket",
+    "category": "Concerts"
+  },
+  {
+    "description": "Streaming Subscription",
+    "category": "Streaming Services"
+  },
+  {
+    "description": "Gaming Subscription",
+    "category": "Gaming"
+  },
+  {
+    "description": "Amusement Park Visit",
+    "category": "Activities"
+  },
+  {
+    "description": "Magazine Subscription",
+    "category": "Subscriptions"
+  },
+  {
+    "description": "New Clothing Purchase",
+    "category": "Clothing"
+  },
+  {
+    "description": "Electronics Purchase",
+    "category": "Electronics"
+  },
+  {
+    "description": "Household Items",
+    "category": "Household Items"
+  },
+  {
+    "description": "Online Shopping Order",
+    "category": "Online Shopping"
+  },
+  {
+    "description": "Beauty & Personal Care",
+    "category": "Beauty & Personal Care"
+  },
+  {
+    "description": "Tuition Fees Payment",
+    "category": "Tuition Fees"
+  },
+  {
+    "description": "School Supplies",
+    "category": "School Supplies"
+  },
+  {
+    "description": "Books Purchase",
+    "category": "Books & Materials"
+  },
+  {
+    "description": "Flight Booking",
+    "category": "Flights"
+  },
+  {
+    "description": "Hotel Reservation",
+    "category": "Hotels"
+  },
+  {
+    "description": "Car Rental",
+    "category": "Car Rentals"
+  },
+  {
+    "description": "Taxi Service Fare",
+    "category": "Taxi Service"
+  },
+  {
+    "description": "Transfer to Savings",
+    "category": "Transfer"
+  },
+  {
+    "description": "Credit Card Payment",
+    "category": "Credit Card Payments"
+  },
+  {
+    "description": "Student Loan Repayment",
+    "category": "Student Loans"
+  },
+  {
+    "description": "Federal Tax Deduction",
+    "category": "Federal Taxes"
+  },
+  {
+    "description": "Tax Refund Received",
+    "category": "Tax Refund"
+  },
+  {
+    "description": "Bank Fee Charge",
+    "category": "Bank Fees"
+  },
+  {
+    "description": "ATM Withdrawal Fee",
+    "category": "ATM Fees"
+  },
+  {
+    "description": "Foreign Transaction Fee",
+    "category": "Foreign Transaction Fees"
+  },
+  {
+    "description": "Charitable Donation",
+    "category": "Charitable Donations"
+  },
+  {
+    "description": "Gift Purchase",
+    "category": "Gifts"
+  },
+  {
+    "description": "Miscellaneous Expense",
+    "category": "Other Expenses"
+  },
+  {
+    "description": "Other Income Received",
+    "category": "Other Income"
+  },
+  {
+    "description": "Uncategorized Expense",
+    "category": "Uncategorized"
+  },
+  {
+    "description": "Miscellaneous Refund",
+    "category": "Other Income"
+  },
+  {
+    "description": "January Salary",
+    "category": "Salary"
+  },
+  {
+    "description": "January Bonus",
+    "category": "Bonus"
+  },
+  {
+    "description": "Interest from Savings",
+    "category": "Interest Income"
+  },
+  {
+    "description": "Refund from Vendor",
+    "category": "Refunds"
+  },
+  {
+    "description": "Rent Payment",
+    "category": "Rent"
+  },
+  {
+    "description": "Home Insurance Payment",
+    "category": "Home Insurance"
+  },
+  {
+    "description": "Electricity Bill",
+    "category": "Electricity"
+  },
+  {
+    "description": "Water Bill",
+    "category": "Water"
+  },
+  {
+    "description": "Gas Bill",
+    "category": "Gas"
+  },
+  {
+    "description": "Phone Service Bill",
+    "category": "Phone Service"
+  },
+  {
+    "description": "Internet Bill",
+    "category": "Internet"
+  },
+  {
+    "description": "Fuel Purchase",
+    "category": "Fuel"
+  },
+  {
+    "description": "Public Transport Fare",
+    "category": "Public Transport"
+  },
+  {
+    "description": "Car Insurance Payment",
+    "category": "Car Insurance"
+  },
+  {
+    "description": "Vehicle Maintenance",
+    "category": "Vehicle Maintenance"
+  },
+  {
+    "description": "Highway Tolls",
+    "category": "Tolls"
+  },
+  {
+    "description": "Parking Fee",
+    "category": "Parking"
+  },
+  {
+    "description": "Groceries Shopping",
+    "category": "Groceries"
+  },
+  {
+    "description": "Dinner at Restaurant",
+    "category": "Restaurants"
+  },
+  {
+    "description": "Coffee at Cafe",
+    "category": "Cafes"
+  },
+  {
+    "description": "Lunch - Fast Food",
+    "category": "Fast Food"
+  },
+  {
+    "description": "Drinks at Bar",
+    "category": "Bars & Alcohol"
+  },
+  {
+    "description": "Health Insurance Premium",
+    "category": "Health Insurance"
+  },
+  {
+    "description": "Gym Membership Fee",
+    "category": "Gym Membership"
+  },
+  {
+    "description": "Doctor Visit",
+    "category": "Doctor Visits"
+  },
+  {
+    "description": "Dental Checkup",
+    "category": "Dental Services"
+  },
+  {
+    "description": "Pharmacy Purchase",
+    "category": "Pharmacy"
+  },
+  {
+    "description": "Prescription Medicine",
+    "category": "Prescriptions"
+  },
+  {
+    "description": "Movie Ticket",
+    "category": "Movies"
+  },
+  {
+    "description": "Concert Ticket",
+    "category": "Concerts"
+  },
+  {
+    "description": "Streaming Subscription",
+    "category": "Streaming Services"
+  },
+  {
+    "description": "Gaming Subscription",
+    "category": "Gaming"
+  },
+  {
+    "description": "Amusement Park Visit",
+    "category": "Activities"
+  },
+  {
+    "description": "Magazine Subscription",
+    "category": "Subscriptions"
+  },
+  {
+    "description": "New Clothing Purchase",
+    "category": "Clothing"
+  },
+  {
+    "description": "Electronics Purchase",
+    "category": "Electronics"
+  },
+  {
+    "description": "Household Items Purchase",
+    "category": "Household Items"
+  },
+  {
+    "description": "Online Shopping Order",
+    "category": "Online Shopping"
+  },
+  {
+    "description": "Beauty & Personal Care",
+    "category": "Beauty & Personal Care"
+  },
+  {
+    "description": "Tuition Fees Payment",
+    "category": "Tuition Fees"
+  },
+  {
+    "description": "School Supplies",
+    "category": "School Supplies"
+  },
+  {
+    "description": "Books Purchase",
+    "category": "Books & Materials"
+  },
+  {
+    "description": "Flight Booking",
+    "category": "Flights"
+  },
+  {
+    "description": "Hotel Reservation",
+    "category": "Hotels"
+  },
+  {
+    "description": "Car Rental",
+    "category": "Car Rentals"
+  },
+  {
+    "description": "Taxi Service Fare",
+    "category": "Taxi Service"
+  },
+  {
+    "description": "Transfer to Savings",
+    "category": "Transfer"
+  },
+  {
+    "description": "Credit Card Payment",
+    "category": "Credit Card Payments"
+  },
+  {
+    "description": "Student Loan Repayment",
+    "category": "Student Loans"
+  },
+  {
+    "description": "Federal Tax Deduction",
+    "category": "Federal Taxes"
+  },
+  {
+    "description": "Tax Refund Received",
+    "category": "Tax Refund"
+  },
+  {
+    "description": "Bank Fee Charge",
+    "category": "Bank Fees"
+  },
+  {
+    "description": "ATM Withdrawal Fee",
+    "category": "ATM Fees"
+  },
+  {
+    "description": "Foreign Transaction Fee",
+    "category": "Foreign Transaction Fees"
+  },
+  {
+    "description": "Charitable Donation",
+    "category": "Charitable Donations"
+  },
+  {
+    "description": "Gift Purchase",
+    "category": "Gifts"
+  },
+  {
+    "description": "Miscellaneous Expense",
+    "category": "Other Expenses"
+  },
+  {
+    "description": "Other Income Received",
+    "category": "Other Income"
+  },
+  {
+    "description": "Uncategorized Expense",
+    "category": "Uncategorized"
+  },
+  {
+    "description": "Miscellaneous Refund",
+    "category": "Other Income"
+  }
 ]
