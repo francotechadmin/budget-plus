@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
-import screenRecording from "/public/screen-recording.mp4";
+import screenRecording from "@/assets/screen-recording.mp4";
 
 const Homepage = () => {
   const { loginWithRedirect } = useAuth0();
