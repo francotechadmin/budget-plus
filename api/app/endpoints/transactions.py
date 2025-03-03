@@ -567,6 +567,9 @@ async def import_bank_transactions(
         logger.error(f"Error reading file {file.filename}: {e}")
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
     
+    # Convert columns to lower case for case insensitive comparison
+    df.columns = map(str.lower, df.columns)
+    
     # Verify that the DataFrame contains all required columns.
     if not required_columns.issubset(set(df.columns)):
         missing = required_columns - set(df.columns)
