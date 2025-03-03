@@ -2425,7 +2425,7 @@ default_rules = [
         "category": "Books & Materials"
     },
     {
-        "description": "Zelle payment from CRISTAL A FRANCO OTANO 23585607192",
+        "description": "Zelle payment from PERSON  23585607192",
         "category": "Fast Food"
     },
     {
@@ -2521,7 +2521,7 @@ default_rules = [
         "category": "Gym Membership"
     },
     {
-        "description": "Zelle payment from CRISTAL A FRANCO OTANO 21579895709",
+        "description": "Zelle payment from PERSON  21579895709",
         "category": "Rent"
     },
     {
@@ -2889,7 +2889,7 @@ default_rules = [
         "category": "Bars & Alcohol"
     },
     {
-        "description": "Zelle payment from CRISTAL A FRANCO OTANO 22896723708",
+        "description": "Zelle payment from PERSON  22896723708",
         "category": "Rent"
     },
     {
@@ -2921,7 +2921,7 @@ default_rules = [
         "category": "Transfer"
     },
     {
-        "description": "Zelle payment from CRISTAL A FRANCO OTANO 23239889435",
+        "description": "Zelle payment from PERSON  23239889435",
         "category": "Rent"
     },
     {
@@ -2949,7 +2949,7 @@ default_rules = [
         "category": "Groceries"
     },
     {
-        "description": "Zelle payment from CRISTAL A FRANCO OTANO 23539431010",
+        "description": "Zelle payment from PERSON  23539431010",
         "category": "Refunds"
     }
 ]
