@@ -553,7 +553,9 @@ async def import_bank_transactions(
         contents = await file.read()
         if file_ext.endswith(".csv"):
             logger.debug("Reading CSV file content.")
-            df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
+            contents_str = contents.decode('utf-8')
+            cleaned_contents = "\n".join(line.rstrip(",") for line in contents_str.splitlines())
+            df = pd.read_csv(io.StringIO(cleaned_contents))
         elif file_ext.endswith((".xlsx", ".xls")):
             logger.debug("Reading Excel file content.")
             df = pd.read_excel(io.BytesIO(contents))
@@ -566,10 +568,32 @@ async def import_bank_transactions(
     except Exception as e:
         logger.error(f"Error reading file {file.filename}: {e}")
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
-    
+
     # Convert columns to lower case for case insensitive comparison
     df.columns = map(str.lower, df.columns)
-    
+
+    # Standardize column names.
+    if 'transaction date' in df.columns:
+        df.rename(columns={'transaction date': 'date'}, inplace=True)
+        logger.debug("Renamed 'transaction date' to 'date'.")
+    elif 'posting date' in df.columns:
+        df.rename(columns={'posting date': 'date'}, inplace=True)
+        logger.debug("Renamed 'posting date' to 'date'.")
+
+
+    if 'debit' in df.columns and 'credit' in df.columns:
+        df['amount'] = 0 - df['debit'].fillna(0) - df['credit'].fillna(0)
+        df.drop(columns=['debit', 'credit'], inplace=True)
+        logger.debug("Standardized 'debit' and 'credit' columns to 'amount'.")
+    elif 'debit' in df.columns:
+        df['amount'] = df['debit']
+        df.drop(columns=['debit'], inplace=True)
+        logger.debug("Standardized 'debit' column to 'amount'.")
+    elif 'credit' in df.columns:
+        df['amount'] = df['credit']
+        df.drop(columns=['credit'], inplace=True)
+        logger.debug("Standardized 'credit' column to 'amount'.")
+
     # Verify that the DataFrame contains all required columns.
     if not required_columns.issubset(set(df.columns)):
         missing = required_columns - set(df.columns)
@@ -584,10 +608,16 @@ async def import_bank_transactions(
     categories_db = db.query(Category).filter(Category.user_id == current_user["sub"]).all()
     # Build a lookup dictionary using lower-case keys.
     categories_dict = {cat.name.lower(): cat for cat in categories_db}
-    
+
     # Convert file date column to proper date objects.
     try:
-        df['date'] = pd.to_datetime(df['date']).dt.date
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+        # Check for any NaT values after conversion.
+        if df['date'].isnull().any():
+            logger.warning("Some dates in the file could not be converted. Please check the date format.")
+            logger.debug(f"Invalid date: {df['date']}")
+            raise HTTPException(status_code=400, detail="Invalid date format in file.")
+        logger.debug("Date column successfully converted to datetime objects.")
     except Exception as e:
         logger.error(f"Error converting date column: {e}")
         raise HTTPException(status_code=400, detail="Invalid date format in file.")
@@ -634,7 +664,8 @@ async def import_bank_transactions(
         
         # Determine the final category.
         file_category = row.get('category', None)
-        if file_category:
+        # check file category is a valid string
+        if file_category and isinstance(file_category, str) and file_category.strip().lower() in categories_dict:
             final_category = file_category
             logger.debug(f"Row {idx}: Using provided category: {final_category}")
         else:
