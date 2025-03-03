@@ -164,7 +164,11 @@ const logoutRoute = createRoute({
   component: function Logout() {
     const { logout } = useAuth0();
     React.useEffect(() => {
-      logout({ logoutParams: { returnTo: window.location.origin } });
+      logout({
+        logoutParams: {
+          returnTo: window.location.origin + import.meta.env.BASE_URL,
+        },
+      });
     }, [logout]);
     return <Loading />;
   },
