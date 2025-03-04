@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database.database import engine, Base
 from .models.models import Base
 from .endpoints import ping, categories, users, transactions_crud, transactions_reporting, transactions_import
+logging.basicConfig(level=logging.DEBUG)
 
 app = FastAPI(title="Production-Ready API")
 
@@ -24,4 +25,3 @@ app.include_router(transactions_reporting.router, prefix="/transactions")
 app.include_router(transactions_import.router, prefix="/transactions")
 app.include_router(users.router, prefix="/users", tags=["Users"])
 
-logging.basicConfig(level=logging.DEBUG)
