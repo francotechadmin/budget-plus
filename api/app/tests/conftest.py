@@ -38,7 +38,11 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 # Provide a client fixture.
 @pytest.fixture(scope="session")
 def client():
-    return TestClient(app)
+    test_client = TestClient(app)
+    yield test_client
+    # Teardown: remove the test database file after all tests in this module run.
+    if os.path.exists("./test.db"):
+        os.remove("./test.db")
 
 # Fixture to pre-populate necessary test data.
 @pytest.fixture(autouse=True)
@@ -72,6 +76,14 @@ def setup_db():
         db.add(cat)
     db.commit()
     db.close()
+
+@pytest.fixture
+def db_session():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Clean up the test database file after tests run.
 def teardown_module(module):

@@ -2,16 +2,16 @@
 import calendar
 import datetime
 import logging
-import io
 import pandas as pd
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case
+from sqlalchemy import func, case, inspect
 from fastapi import HTTPException
 from app.models.models import Transaction, Category, Section, CategoryCorrections
 from app.schemas.schemas import NewTransactionRequest, UpdateTransactionRequest
 from app.transaction_categorization.model import predict_category
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 # CRUD Functions
 
@@ -289,18 +289,40 @@ def get_history_service(db: Session, current_user: dict):
     return history
 
 def get_transactions_range_service(db: Session, current_user: dict):
-    subq = (
-        db.query(func.to_char(Transaction.date, 'YYYY-MM').label("month"))
-        .filter(
-            Transaction.user_id == current_user["sub"],
-            Transaction.is_deleted == 0,
-        )
-        .distinct()
-        .subquery()
-    )
-    results = db.query(subq.c.month).order_by(subq.c.month.desc()).all()
-    months = [row[0] for row in results]
-    return months
+    try:
+        # Detect the dialect
+        dialect = inspect(db.bind).dialect.name
+        
+        if dialect == 'sqlite':
+            # SQLite-specific implementation
+            results = (
+                db.query(func.strftime('%Y-%m', Transaction.date))
+                .filter(Transaction.is_deleted == 0)
+                .distinct()
+                .order_by(func.strftime('%Y-%m', Transaction.date).desc())
+                .all()
+            )
+
+        else:
+            # PostgreSQL and other databases implementation
+            results = (
+                db.query(
+                    func.to_char(Transaction.date, 'YYYY-MM')
+                )
+                .filter(Transaction.is_deleted == 0)
+                .distinct()
+                .order_by(func.to_char(Transaction.date, 'YYYY-MM').desc())
+                .all()
+            )
+        
+        # Convert results to list of strings
+        months = [row[0] for row in results]
+        
+        return months
+    except Exception as e:
+        logger.error(f"Error in get_transactions_range_service: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving transaction range: {str(e)}")
+
 
 # Import Transactions Service
 
