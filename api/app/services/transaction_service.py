@@ -1,7 +1,7 @@
 # app/services/transaction_service.py
 import calendar
 import datetime
-import logging
+from ..utils.logger import get_logger
 import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case, inspect
@@ -10,11 +10,9 @@ from app.models.models import Transaction, Category, Section, CategoryCorrection
 from app.schemas.schemas import NewTransactionRequest, UpdateTransactionRequest
 from app.transaction_categorization.model import predict_category
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logger = get_logger(__name__)
 
 # CRUD Functions
-
 def get_all_transactions(db: Session, current_user: dict):
     txns = (
         db.query(Transaction, Category.name.label("category_name"), Section.name.label("section_name"))
@@ -329,7 +327,11 @@ def get_transactions_range_service(db: Session, current_user: dict):
 from app.utils.file_parser import parse_transactions_file
 
 async def import_transactions_service(file, db: Session, current_user: dict):
-    df = await parse_transactions_file(file)
+    try:
+        df = await parse_transactions_file(file)
+    except HTTPException as e:
+        logger.error(f"Error parsing file: {e.detail}")
+        raise e
 
     new_transactions = []
     # Pre-fetch categories for the current user.

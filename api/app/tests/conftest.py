@@ -31,7 +31,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 # Override get_current_user to simulate an authenticated user.
 def override_get_current_user():
-    return {"sub": 1}
+    return {"sub": 1, "id": 1, "username": "testuser"}
 
 app.dependency_overrides[get_current_user] = override_get_current_user
 
