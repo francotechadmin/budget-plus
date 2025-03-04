@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.models.models import Transaction, Category, Section, CategoryCorrections
 from app.schemas.schemas import NewTransactionRequest, UpdateTransactionRequest
-from app.transaction_categorization.model import predict_category
+from app.categorization.model import predict_category
 
 logger = get_logger(__name__)
 # CRUD Functions

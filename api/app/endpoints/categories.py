@@ -7,7 +7,7 @@ from ..database.database import get_db
 from ..auth import get_current_user
 from ..models.models import Category, Section
 from ..schemas.schemas import DescriptionRequest
-from ..transaction_categorization.model import predict_category_with_confidence
+from ..categorization.model import predict_category_with_confidence
 
 router = APIRouter()
 
