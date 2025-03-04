@@ -8,10 +8,9 @@ from sqlalchemy import create_engine
 from app.main import Base # Import your Base model
 
 # Logging configuration
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
+from app.utils.logger import get_logger
+# Configure logging
+logger = get_logger(__name__)
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

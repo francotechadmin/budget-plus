@@ -1,9 +1,8 @@
 from fastapi import APIRouter
-import logging
+from ..utils.logger import get_logger
 
 # Configure logging
-logger = logging.getLogger(__name__)
-
+logger = get_logger(__name__)
 router = APIRouter()
 
 @router.get("/ping", summary="Health check endpoint")

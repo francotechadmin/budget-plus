@@ -1,6 +1,6 @@
 import time
 import json
-import logging
+from .utils.logger import get_logger
 import requests
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -14,15 +14,7 @@ API_AUDIENCE = os.getenv("API_AUDIENCE") # e.g., "https://your-api-identifier"
 ALGORITHMS = ["RS256"]
 
 # Configure logging
-logger = logging.getLogger("auth_logger")
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+logger = get_logger(__name__)
 
 # Cache variables for JWKS keys
 JWKS_CACHE = None

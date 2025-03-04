@@ -2,8 +2,13 @@
 import io
 import pandas as pd
 from fastapi import HTTPException, UploadFile
+from ..utils.logger import get_logger
+
+# Configure logging
+logger = get_logger(__name__)   
 
 async def parse_transactions_file(file: UploadFile) -> pd.DataFrame:
+    logger.info("Parsing transactions file.")
     file_ext = file.filename.lower()
     try:
         contents = await file.read()
@@ -16,8 +21,10 @@ async def parse_transactions_file(file: UploadFile) -> pd.DataFrame:
         else:
             raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a CSV or Excel file.")
     except Exception as e:
+        logger.error(f"Error reading file: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
 
+    logger.info("File read successfully. Processing data.")
     # Convert columns to lower case and rename as needed.
     df.columns = map(str.lower, df.columns)
     if 'transaction date' in df.columns:
@@ -34,9 +41,12 @@ async def parse_transactions_file(file: UploadFile) -> pd.DataFrame:
         df['amount'] = df['credit']
         df.drop(columns=['credit'], inplace=True)
 
+    logger.info("Validating required columns.")
     required_columns = {"date", "description", "amount"}
     if not required_columns.issubset(set(df.columns)):
+        logger.error("Missing required columns.")
         missing = required_columns - set(df.columns)
+        logger.error(f"Missing columns: {', '.join(missing)}")
         raise HTTPException(status_code=400, detail=f"Missing required columns: {', '.join(missing)}")
     try:
         df['date'] = pd.to_datetime(df['date'], errors='coerce')

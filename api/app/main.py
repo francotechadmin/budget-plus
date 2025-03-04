@@ -1,11 +1,13 @@
-import logging
+from .utils.logger import setup_logger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database.database import engine, Base
 from .models.models import Base
 from .endpoints import ping, categories, users, transactions_crud, transactions_reporting, transactions_import
-logging.basicConfig(level=logging.DEBUG)
+
+# Setup logger
+setup_logger()
 
 app = FastAPI(title="Production-Ready API")
 

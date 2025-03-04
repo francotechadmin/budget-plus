@@ -26,6 +26,7 @@ class UserRead(BaseModel):
 
 
 class DescriptionRequest(BaseModel):
+    """DescriptionRequest schema for updating a transaction description."""
     description: str
 
 
@@ -37,6 +38,7 @@ class NewTransactionRequest(BaseModel):
     category: Optional[str] = None
 
 class UpdateTransactionRequest(BaseModel):
+    """UpdateTransactionRequest schema for updating a transaction's category."""
     transaction_id: int
     category: str
     index_es: Optional[str] = None

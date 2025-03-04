@@ -1,6 +1,6 @@
 # Import standard libraries
 import calendar
-import logging
+from ..utils.logger import get_logger
 import io
 import datetime
 import pandas as pd
@@ -21,8 +21,7 @@ from ..auth import get_current_user
 from app.transaction_categorization.model import predict_category
 
 # Set up logger for this module
-logger = logging.getLogger(__name__)
-
+logger = get_logger(__name__)
 router = APIRouter()
 
 @router.get("/", summary="Get all transactions")
