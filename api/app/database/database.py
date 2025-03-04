@@ -1,8 +1,7 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import logging
 
 # Set up logging
@@ -30,7 +29,9 @@ except Exception as e:
 # create SQLAlchemy ORM session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Base class for SQLAlchemy models."""
+    pass
 
 def get_db():
     """Dependency to get DB session."""
