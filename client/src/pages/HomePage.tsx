@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpenText, LogIn, Moon, Notebook, Sun } from "lucide-react";
 import screenRecording from "@/assets/screen-recording.mp4";
 import { useTheme } from "@/hooks/useTheme";
+import { usePingQuery } from "../hooks/api/usePingQuery";
 
 const Homepage = () => {
   const { loginWithRedirect } = useAuth0();
@@ -13,6 +14,9 @@ const Homepage = () => {
   const handleLearnMore = () => {
     window.open("https://github.com/francotechadmin/budget-plus", "_blank");
   };
+
+  // ping the API
+  usePingQuery();
 
   return (
     <div className="min-h-screen text-gray-900 dark:text-gray-100">
