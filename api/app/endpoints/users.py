@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from ..schemas.schemas import UserCreate, UserRead
-from ..crud.crud import get_user, create_user
+from ..services.user_crud import get_user, create_user
 from ..database.database import get_db
 from ..auth import get_current_user, get_user_info
 from ..utils.logger import get_logger
