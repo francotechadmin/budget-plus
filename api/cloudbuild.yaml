@@ -4,8 +4,9 @@ steps:
     args:
       - "-c"
       - |
-        pip install -r requirements.txt
+        pip install -r api/requirements.txt
         pytest --maxfail=1 --disable-warnings -q
+    id: Test
   - name: gcr.io/cloud-builders/docker
     args:
       - build
