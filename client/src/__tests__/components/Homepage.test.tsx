@@ -59,6 +59,19 @@ describe("Homepage Component", () => {
     expect(loginWithRedirect).toHaveBeenCalledTimes(1);
   });
 
+  test("opens GitHub repo when Learn More button is clicked", () => {
+    const open = jest.fn();
+    window.open = open;
+
+    render(<Homepage />);
+
+    fireEvent.click(screen.getByText("Learn More"));
+    expect(open).toHaveBeenCalledWith(
+      "https://github.com/francotechadmin/budget-plus",
+      "_blank"
+    );
+  });
+
   test("toggles theme when theme button is clicked", () => {
     const toggleTheme = jest.fn();
     (useTheme as jest.Mock).mockReturnValue({
