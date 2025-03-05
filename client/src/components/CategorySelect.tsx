@@ -1,5 +1,4 @@
 // src/components/CategorySelect.tsx
-import React from "react";
 import {
   Select,
   SelectContent,

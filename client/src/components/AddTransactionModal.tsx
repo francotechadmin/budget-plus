@@ -1,5 +1,5 @@
 // src/components/AddTransactionModal.tsx
-import React, { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -72,7 +72,7 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
     }
   };
 
-  const resetForm = React.useCallback(() => {
+  const resetForm = useCallback(() => {
     // Reset form and close modal
     setFormData({
       date: new Date().toISOString().split("T")[0],
@@ -104,7 +104,10 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              aria-label="Date"
+            >
               Date
             </label>
             <DatePicker
@@ -117,7 +120,10 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              aria-label="Description"
+            >
               Description
             </label>
             <Input
@@ -130,7 +136,10 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
           </div>
           {/* Transaction type toggle */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              aria-label="Transaction Type"
+            >
               Transaction Type
             </label>
             <div className="flex space-x-2 mt-1">
@@ -156,7 +165,10 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              aria-label="Amount"
+            >
               Amount
             </label>
             <Input
@@ -175,7 +187,10 @@ export function AddTransactionModal({ sections }: AddTransactionModalProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className="block text-sm font-medium text-gray-700"
+              aria-label="Category"
+            >
               Category
             </label>
             <CategorySelect
