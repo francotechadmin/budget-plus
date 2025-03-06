@@ -42,7 +42,7 @@ def get_transactions_by_month(
         HTTPException: If there is an error retrieving transactions.
     """
     try:
-        logger.info(f"Fetching transactions for user {current_user['id']} for {year}-{month}")
+        logger.info(f"Fetching transactions for user {current_user['sub']} for {year}-{month}")
         return get_transactions_by_month_service(db, current_user, year, month)
     except Exception as e:
         logger.error(f"Error retrieving transactions by month: {e}")
@@ -69,7 +69,7 @@ def get_expense_totals(
     """
     
     try:
-        logger.info(f"Calculating expense totals for user {current_user['id']} for {year}-{month}")
+        logger.info(f"Calculating expense totals for user {current_user['sub']} for {year}-{month}")
         return get_expense_totals_service(db, current_user, year, month)
     except Exception as e:
         logger.error(f"Error calculating expense totals: {e}")
@@ -95,7 +95,7 @@ def get_totals(
         HTTPException: If there is an error calculating the totals.
     """
     try:
-        logger.info(f"Calculating totals for user {current_user['id']} for {year}-{month}")
+        logger.info(f"Calculating totals for user {current_user['sub']} for {year}-{month}")
         return get_totals_service(db, current_user, year, month)
     except Exception as e:
         logger.error(f"Error calculating totals: {e}")
@@ -123,7 +123,7 @@ def get_grouped_transactions(
         HTTPException: If there is an error retrieving grouped transactions.
     """
     try:
-        logger.info(f"Fetching grouped transactions for user {current_user['id']} for {year}-{month}")
+        logger.info(f"Fetching grouped transactions for user {current_user['sub']} for {year}-{month}")
         return get_grouped_transactions_service(db, current_user, year, month)
     except Exception as e:
         logger.error(f"Error retrieving grouped transactions: {e}")
@@ -143,7 +143,7 @@ def get_history(db: Session = Depends(get_db), current_user: dict = Depends(get_
         HTTPException: If there is an error retrieving transaction history.
     """
     try:
-        logger.info(f"Fetching transaction history for user {current_user['id']}")
+        logger.info(f"Fetching transaction history for user {current_user['sub']}")
         return get_history_service(db, current_user)
     except Exception as e:
         logger.error(f"Error retrieving transaction history: {e}")
@@ -163,7 +163,7 @@ def get_range(db: Session = Depends(get_db), current_user: dict = Depends(get_cu
         HTTPException: If there is an error retrieving the transaction range.
     """
     try:
-        logger.info(f"Fetching transaction range for user {current_user['id']}")
+        logger.info(f"Fetching transaction range for user {current_user['sub']}")
         return get_transactions_range_service(db, current_user)
     except Exception as e:
         logger.error(f"Error retrieving transaction range: {e}")

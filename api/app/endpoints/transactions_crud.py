@@ -29,7 +29,7 @@ def get_transactions(db: Session = Depends(get_db), current_user: dict = Depends
     """
     try:
         transactions = get_all_transactions(db, current_user)
-        logger.info(f"Retrieved transactions for user {current_user['id']}")
+        logger.info(f"Retrieved transactions for user {current_user['sub']}")
         return transactions
     except Exception as e:
         logger.error(f"Error retrieving transactions: {e}")
@@ -53,7 +53,7 @@ def add_transaction(
     """
     try:
         new_txn = create_transaction(db, current_user, transaction)
-        logger.info(f"Added new transaction for user {current_user['id']}")
+        logger.info(f"Added new transaction for user {current_user['sub']}")
         return new_txn
     except Exception as e:
         logger.error(f"Error adding transaction: {e}")
@@ -77,7 +77,7 @@ def update_txn(
     """
     try:
         updated = update_transaction_category(db, current_user, update_request)
-        logger.info(f"Updated transaction for user {current_user['id']}")
+        logger.info(f"Updated transaction for user {current_user['sub']}")
         return updated
     except Exception as e:
         logger.error(f"Error updating transaction: {e}")
@@ -101,7 +101,7 @@ def delete_transaction(
     """
     try:
         result = delete_transaction_by_id(db, current_user, transaction_id)
-        logger.info(f"Deleted transaction {transaction_id} for user {current_user['id']}")
+        logger.info(f"Deleted transaction {transaction_id} for user {current_user['sub']}")
         return result
     except Exception as e:
         logger.error(f"Error deleting transaction: {e}")
