@@ -191,13 +191,8 @@ def test_import_with_different_column_names(client):
     files = {"file": ("transactions.csv", io.BytesIO(file_bytes), "text/csv")}
     
     response = client.post("/transactions/import", files=files)
-    # If your import service maps these columns, this should succeed
-    # If not, it should fail with a missing columns error
-    if response.status_code == 200:
-        assert response.json()["detail"] == "Transactions imported successfully."
-    else:
-        assert response.status_code == 400
-        assert "Missing required columns" in response.json()["detail"]
+    assert response.status_code == 400
+    assert "Missing required columns" in response.json()["detail"]
 
 def test_import_large_file(client):
     """Test importing a large file with many transactions."""

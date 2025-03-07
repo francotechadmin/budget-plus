@@ -2,7 +2,7 @@
 from ..utils.logger import get_logger
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.services.transaction_resporting_service import (
+from app.services.transaction_reporting_service import (
     get_transactions_by_month_service,
     get_expense_totals_service,
     get_totals_service,

@@ -59,7 +59,7 @@ async def import_transactions_service(file, db: Session, current_user: dict):
     # Process each row of the DataFrame.
     for idx, row in df.iterrows():
         # Skip rows with missing required fields.
-        if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']):
+        if pd.isna(row['date']) or pd.isna(row['description']) or pd.isna(row['amount']) or row['description'] == "":
             logger.warning(f"Row {idx} is missing required fields. Skipping.")
             continue
 

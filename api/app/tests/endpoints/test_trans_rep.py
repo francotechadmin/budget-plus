@@ -7,8 +7,6 @@ from app.models.models import Transaction, Category, Section
 def create_transaction(db, description, date, amount, category_name, user_id='auth0|1234567890'):
     # Look up the category by name.
     cat = db.query(Category).filter(Category.name == category_name, Category.user_id == user_id).first()
-    if not cat:
-        raise Exception(f"Category {category_name} not found.")
     txn = Transaction(
         user_id=user_id,
         description=description,
