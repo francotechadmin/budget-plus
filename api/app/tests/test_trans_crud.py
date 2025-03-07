@@ -1,8 +1,13 @@
-def test_get_transactions_empty(client):
+from app.models.models import Transaction
+def test_get_transactions_empty(client, db_session):
     """Test that when there are no transactions, the endpoint returns an empty list."""
+    # Clear any existing transactions.
+    db_session.query(Transaction).delete()
+    db_session.commit()
+
     response = client.get("/transactions/")
     # Uncomment below to debug error details.
-    # print(response.json())
+    print(response.json())
     assert response.status_code == 200
     assert response.json() == []
 
