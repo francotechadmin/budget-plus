@@ -92,8 +92,3 @@ def db_session():
         yield db
     finally:
         db.close()
-
-# Clean up the test database file after tests run.
-def teardown_module(module):
-    if os.path.exists("./test.db"):
-        os.remove("./test.db")
