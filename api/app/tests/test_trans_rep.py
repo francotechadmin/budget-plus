@@ -2,7 +2,7 @@ import datetime
 from app.models.models import Transaction, Category, Section
 
 # Helper function to insert a transaction directly into the DB.
-def create_transaction(db, description, date, amount, category_name, user_id=1):
+def create_transaction(db, description, date, amount, category_name, user_id='auth0|1234567890'):
     # Look up the category by name.
     cat = db.query(Category).filter(Category.name == category_name, Category.user_id == user_id).first()
     if not cat:
@@ -63,7 +63,7 @@ def test_get_expense_totals(client, db_session):
     assert "Test Category" in totals
     assert totals["Test Category"] == 150.0
 
-def test_get_totals(client, db_session):
+def test_get_totals(client, db_session, user_id='auth|1234567890'):
     db_session.query(Transaction).delete()
     db_session.commit()
     
@@ -83,13 +83,13 @@ def test_get_totals(client, db_session):
         db_session.commit()
         db_session.refresh(income_section)
     
-    salary_cat = db_session.query(Category).filter(Category.name == "Salary", Category.user_id == 1).first()
+    salary_cat = db_session.query(Category).filter(Category.name == "Salary", Category.user_id == user_id).first()
     if not salary_cat:
         salary_cat = Category(
             name="Salary",
             description="Income category",
             section_id=income_section.id,
-            user_id=1,
+            user_id='auth0|1234567890',
         )
         db_session.add(salary_cat)
         db_session.commit()

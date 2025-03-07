@@ -9,17 +9,17 @@ def test_get_categories(client, db_session):
     db_session.commit()
 
     # Create two sections.
-    section_a = Section(name="Section A")
-    section_b = Section(name="Section B")
+    section_a = Section(name="Section A", user_id='auth0|1234567890')
+    section_b = Section(name="Section B", user_id='auth0|1234567890')
     db_session.add_all([section_a, section_b])
     db_session.commit()
     db_session.refresh(section_a)
     db_session.refresh(section_b)
 
     # Create categories in each section.
-    cat1 = Category(name="Category 1", description="Desc 1", section_id=section_a.id, user_id=1)
-    cat2 = Category(name="Category 2", description="Desc 2", section_id=section_a.id, user_id=1)
-    cat3 = Category(name="Category 3", description="Desc 3", section_id=section_b.id, user_id=1)
+    cat1 = Category(name="Category 1", description="Desc 1", section_id=section_a.id, user_id='auth0|1234567890')
+    cat2 = Category(name="Category 2", description="Desc 2", section_id=section_a.id, user_id='auth0|1234567890')
+    cat3 = Category(name="Category 3", description="Desc 3", section_id=section_b.id, user_id='auth0|1234567890')
     db_session.add_all([cat1, cat2, cat3])
     db_session.commit()
 

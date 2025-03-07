@@ -115,6 +115,7 @@ def get_user_info(token: str = Depends(get_token_auth_header)) -> dict:
     user_info_url = f"https://{AUTH0_DOMAIN}/userinfo"
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.get(user_info_url, headers=headers, verify=False)
+    logger.debug(f"User info response: {response.text}")
     if response.status_code != 200:
         logger.error(f"Failed to fetch user info. Status code: {response.status_code}")
         raise HTTPException(status_code=401, detail="Invalid token")

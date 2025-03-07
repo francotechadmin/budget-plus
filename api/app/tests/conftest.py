@@ -31,7 +31,15 @@ app.dependency_overrides[get_db] = override_get_db
 
 # Override get_current_user to simulate an authenticated user.
 def override_get_current_user():
-    return {"sub": 1, "id": 1, "username": "testuser"}
+    return {
+        "sub": "auth0|1234567890",
+        "nickname": "testuser",
+        "name": "John Doe",
+        "picture": "https://example.com/picture.jpg",
+        "updated_at": "2025-03-04T14:22:47.070Z",
+        "email": "test@gmail.com",
+        "email_verified": True,
+    }
 
 app.dependency_overrides[get_current_user] = override_get_current_user
 
@@ -71,7 +79,7 @@ def setup_db():
             name=cat_name,
             description="Test category",
             section_id=test_section.id,
-            user_id=1,
+            user_id="auth0|1234567890",
         )
         db.add(cat)
     db.commit()

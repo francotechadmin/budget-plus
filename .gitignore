@@ -14,3 +14,4 @@ client/.env.production
 api/.env.override
 api/.env.dev
 api/.env.local
+api/.coverage
